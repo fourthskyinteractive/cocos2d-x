@@ -18,7 +18,16 @@
     <ClInclude Include="..\include\Export.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+	<ClInclude Include="..\win32\AudioController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\win32\MciPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+	<ClInclude Include="..\win32\MediaStreamer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+	<ClInclude Include="..\win32\XAudio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\SimpleAudioEngine.h">
@@ -29,6 +38,12 @@
     <ClCompile Include="..\win32\MciPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+	<ClInclude Include="..\win32\MediaStreamer.cpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+	<ClInclude Include="..\win32\XAudio.cpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClCompile Include="..\win32\SimpleAudioEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

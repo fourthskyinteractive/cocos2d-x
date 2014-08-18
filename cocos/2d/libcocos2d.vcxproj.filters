@@ -325,6 +325,12 @@
     <ClCompile Include="..\base\CCConsole.cpp">
       <Filter>base</Filter>
     </ClCompile>
+	<ClCompile Include="..\base\CCController.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+	<ClCompile Include="..\base\CCController-win32.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
     <ClCompile Include="..\base\CCData.cpp">
       <Filter>base</Filter>
     </ClCompile>
@@ -338,6 +344,9 @@
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="..\base\CCEventAcceleration.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+	<ClCompile Include="..\base\CCEventController.cpp">
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="..\base\CCEventCustom.cpp">
@@ -895,6 +904,9 @@
     <ClInclude Include="..\base\CCConsole.h">
       <Filter>base</Filter>
     </ClInclude>
+	<ClInclude Include="..\base\CCController.h">
+      <Filter>base</Filter>
+    </ClInclude>
     <ClInclude Include="..\base\CCData.h">
       <Filter>base</Filter>
     </ClInclude>
@@ -908,6 +920,9 @@
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\base\CCEventAcceleration.h">
+      <Filter>base</Filter>
+    </ClInclude>
+	<ClInclude Include="..\base\CCEventController.h">
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\base\CCEventCustom.h">

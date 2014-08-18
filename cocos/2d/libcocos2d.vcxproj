@@ -65,10 +65,10 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>../../external/sqlite3/libraries/win32;$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>../../external/sqlite3/libraries/win32;$(MSBuildProgramFiles32)\Windows Kits\8.1\Lib\winv6.3\um\x86;$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>../../external/sqlite3/libraries/win32;$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>../../external/sqlite3/libraries/win32;$(MSBuildProgramFiles32)\Windows Kits\8.1\Lib\winv6.3\um\x86;$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
@@ -116,7 +116,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\sqlite3\libraries\win32\*.*" "$(OutDir)
       <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <ModuleDefinitionFile>cocos2d.def</ModuleDefinitionFile>
-      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -158,7 +158,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
 </Command>
     </PreLinkEvent>
     <Link>
-      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries> ;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -203,12 +203,15 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClCompile Include="..\base\ccCArray.cpp" />
     <ClCompile Include="..\base\CCConfiguration.cpp" />
     <ClCompile Include="..\base\CCConsole.cpp" />
+	<ClCompile Include="..\base\CCController.cpp" />
+	<ClCompile Include="..\base\CCController-win32.cpp" />
     <ClCompile Include="..\base\CCData.cpp" />
     <ClCompile Include="..\base\CCDataVisitor.cpp" />
     <ClCompile Include="..\base\CCDirector.cpp" />
     <ClCompile Include="..\base\CCEvent.cpp" />
     <ClCompile Include="..\base\CCEventAcceleration.cpp" />
-    <ClCompile Include="..\base\CCEventCustom.cpp" />
+    <ClCompile Include="..\base\CCEventController.cpp" />
+	<ClCompile Include="..\base\CCEventCustom.cpp" />
     <ClCompile Include="..\base\CCEventDispatcher.cpp" />
     <ClCompile Include="..\base\CCEventFocus.cpp" />
     <ClCompile Include="..\base\CCEventKeyboard.cpp" />
@@ -392,11 +395,13 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClInclude Include="..\base\ccConfig.h" />
     <ClInclude Include="..\base\CCConfiguration.h" />
     <ClInclude Include="..\base\CCConsole.h" />
+	<ClInclude Include="..\base\CCController.h" />
     <ClInclude Include="..\base\CCData.h" />
     <ClInclude Include="..\base\CCDataVisitor.h" />
     <ClInclude Include="..\base\CCDirector.h" />
     <ClInclude Include="..\base\CCEvent.h" />
     <ClInclude Include="..\base\CCEventAcceleration.h" />
+	<ClInclude Include="..\base\CCEventController.h" />
     <ClInclude Include="..\base\CCEventCustom.h" />
     <ClInclude Include="..\base\CCEventDispatcher.h" />
     <ClInclude Include="..\base\CCEventFocus.h" />

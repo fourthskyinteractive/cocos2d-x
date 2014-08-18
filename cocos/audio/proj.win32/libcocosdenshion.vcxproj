@@ -73,7 +73,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProgramFiles32)\Windows Kits\8.1\Include\shared;$(MSBuildProgramFiles32)\Windows Kits\8.1\Include\um;$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_EXPORT_DLL_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -97,7 +97,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProgramFiles32)\Windows Kits\8.1\Include\shared;$(MSBuildProgramFiles32)\Windows Kits\8.1\Include\um;$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v7.1A\include;..\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_EXPORT_DLL_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -123,11 +123,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Export.h" />
-    <ClInclude Include="..\win32\MciPlayer.h" />
+    <ClInclude Include="..\win32\AudioController.h" />
+	<ClInclude Include="..\win32\MciPlayer.h" />
+	<ClInclude Include="..\win32\MediaStreamer.h" />
+	<ClInclude Include="..\win32\XAudio.h" />
     <ClInclude Include="..\include\SimpleAudioEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\win32\MciPlayer.cpp" />
+	<ClCompile Include="..\win32\MediaStreamer.cpp" />
+	<ClCompile Include="..\win32\XAudio.cpp" />
     <ClCompile Include="..\win32\SimpleAudioEngine.cpp" />
   </ItemGroup>
   <ItemGroup>

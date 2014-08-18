@@ -1,7 +1,15 @@
 #include "MciPlayer.h"
+#include "cocos2d.h"
+USING_NS_CC;
 
 #define WIN_CLASS_NAME        "CocosDenshionCallbackWnd"
 #define BREAK_IF(cond)      if (cond) break;
+
+static std::string _FullPath(const char * szPath)
+{
+	return FileUtils::getInstance()->fullPathForFilename(szPath);
+}
+
 
 namespace CocosDenshion {
 
@@ -228,3 +236,261 @@ LRESULT WINAPI _SoundPlayProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 
 } // end of namespace CocosDenshion
+
+MciAudioController::MciAudioController()
+	: m_backgroundID(0)
+{
+
+}
+
+void MciAudioController::Initialize()
+{
+	m_engineExperiencedCriticalError = false;
+}
+
+void MciAudioController::CreateResources()
+{
+
+}
+
+void MciAudioController::ReleaseResources()
+{
+	EffectList::iterator EffectIter = m_soundEffects.begin();
+	for (; EffectIter != m_soundEffects.end(); EffectIter++)
+	{
+		EffectIter->second->Close();
+		delete EffectIter->second;
+	}
+
+	m_soundEffects.clear();
+}
+
+void MciAudioController::Start()
+{
+	if (m_engineExperiencedCriticalError)
+	{
+		return;
+	}
+
+	if (!m_backgroundFile.empty())
+		PlayBackgroundMusic(m_backgroundFile.c_str(), m_backgroundLoop);
+}
+
+void MciAudioController::Render()
+{
+	if (m_engineExperiencedCriticalError)
+	{
+		ReleaseResources();
+		Initialize();
+		CreateResources();
+		Start();
+		if (m_engineExperiencedCriticalError)
+		{
+			return;
+		}
+	}
+}
+
+void MciAudioController::PlayBackgroundMusic(const char* pszFilePath, bool bLoop)
+{
+	m_backgroundFile = pszFilePath;
+	m_backgroundLoop = bLoop;
+
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	StopBackgroundMusic(true);
+	PlaySoundEffect(pszFilePath, bLoop, m_backgroundID, true);
+}
+
+void MciAudioController::StopBackgroundMusic(bool bReleaseData)
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	StopSoundEffect(m_backgroundID);
+
+	if (bReleaseData)
+		UnloadSoundEffect(m_backgroundID);
+}
+
+void MciAudioController::PauseBackgroundMusic()
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	PauseSoundEffect(m_backgroundID);
+}
+
+void MciAudioController::ResumeBackgroundMusic()
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	ResumeSoundEffect(m_backgroundID);
+}
+
+void MciAudioController::RewindBackgroundMusic()
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	RewindSoundEffect(m_backgroundID);
+}
+
+bool MciAudioController::IsBackgroundMusicPlaying()
+{
+	return IsSoundEffectStarted(m_backgroundID);
+}
+
+void MciAudioController::PlaySoundEffect(const char* pszFilePath, bool bLoop, unsigned int& sound, bool isMusic)
+{
+	sound = Hash(pszFilePath);
+
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+	{
+		PreloadSoundEffect(pszFilePath, isMusic);
+	}
+
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return;
+
+	m_soundEffects[sound]->Play((bLoop) ? -1 : 1);
+}
+
+void MciAudioController::PlaySoundEffect(unsigned int sound)
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return;
+
+	StopSoundEffect(sound);
+
+	m_soundEffects[sound]->Play(1);
+}
+
+bool MciAudioController::IsSoundEffectStarted(unsigned int sound)
+{
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return false;
+
+	return m_soundEffects[sound]->IsPlaying();
+}
+
+void MciAudioController::StopSoundEffect(unsigned int sound)
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return;
+
+	m_soundEffects[sound]->Stop();
+}
+
+void MciAudioController::PauseSoundEffect(unsigned int sound)
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return;
+
+	m_soundEffects[sound]->Pause();
+}
+
+void MciAudioController::ResumeSoundEffect(unsigned int sound)
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return;
+
+	m_soundEffects[sound]->Resume();
+}
+
+void MciAudioController::RewindSoundEffect(unsigned int sound)
+{
+	StopSoundEffect(sound);
+	PlaySoundEffect(sound);
+}
+
+void MciAudioController::PauseAllSoundEffects()
+{
+	EffectList::iterator iter;
+	for (iter = m_soundEffects.begin(); iter != m_soundEffects.end(); iter++)
+	{
+		PauseSoundEffect(iter->first);
+	}
+}
+
+void MciAudioController::ResumeAllSoundEffects()
+{
+	EffectList::iterator iter;
+	for (iter = m_soundEffects.begin(); iter != m_soundEffects.end(); iter++)
+	{
+		ResumeSoundEffect(iter->first);
+	}
+}
+
+void MciAudioController::StopAllSoundEffects()
+{
+	EffectList::iterator iter;
+	for (iter = m_soundEffects.begin(); iter != m_soundEffects.end(); iter++)
+	{
+		StopSoundEffect(iter->first);
+	}
+}
+
+void MciAudioController::PreloadSoundEffect(const char* pszFilePath, bool isMusic)
+{
+	if (m_engineExperiencedCriticalError)
+		return;
+
+	int sound = Hash(pszFilePath);
+
+	m_soundEffects.insert(Effect(sound, new CocosDenshion::MciPlayer()));
+	CocosDenshion::MciPlayer* pPlayer = m_soundEffects[sound];
+	pPlayer->Open(_FullPath(pszFilePath).c_str(), sound);
+}
+
+void MciAudioController::UnloadSoundEffect(const char* pszFilePath)
+{
+	int sound = Hash(pszFilePath);
+
+	UnloadSoundEffect(sound);
+}
+
+void MciAudioController::UnloadSoundEffect(unsigned int sound)
+{
+	if (m_engineExperiencedCriticalError) {
+		return;
+	}
+
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return;
+
+	RemoveFromList(sound);
+}
+
+void MciAudioController::RemoveFromList(unsigned int sound)
+{
+	if (m_soundEffects.end() == m_soundEffects.find(sound))
+		return;
+
+	m_soundEffects[sound]->Close();
+	delete m_soundEffects[sound];
+	m_soundEffects.erase(sound);
+}
