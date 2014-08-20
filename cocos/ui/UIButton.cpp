@@ -64,6 +64,7 @@ _normalTextureScaleXInSize(1.0f),
 _normalTextureScaleYInSize(1.0f),
 _pressedTextureScaleXInSize(1.0f),
 _pressedTextureScaleYInSize(1.0f),
+_zoomScale(0.1f),
 _normalTextureLoaded(false),
 _pressedTextureLoaded(false),
 _disabledTextureLoaded(false),
@@ -231,6 +232,7 @@ void Button::loadTextureNormal(const std::string& normal,TextureResType texType)
     _normalTextureSize = _buttonNormalRenderer->getContentSize();
     updateFlippedX();
     updateFlippedY();
+    this->updateChildrenDisplayedRGBA();
     
     updateContentSizeWithTextureSize(_normalTextureSize);
     _normalTextureLoaded = true;
@@ -262,7 +264,8 @@ void Button::loadTexturePressed(const std::string& selected,TextureResType texTy
     //TODO: mark as dirty
     updateFlippedX();
     updateFlippedY();
-    
+    this->updateChildrenDisplayedRGBA();
+
     _pressedTextureLoaded = true;
     _pressedTextureAdaptDirty = true;
 }
@@ -291,7 +294,8 @@ void Button::loadTextureDisabled(const std::string& disabled,TextureResType texT
     _disabledTextureSize = _buttonDisableRenderer->getContentSize();
     updateFlippedX();
     updateFlippedY();
-    
+    this->updateChildrenDisplayedRGBA();
+
     _disabledTextureLoaded = true;
     _disabledTextureAdaptDirty = true;
 }
@@ -383,9 +387,9 @@ void Button::onPressStateChangedToPressed()
         {
             _buttonNormalRenderer->stopAllActions();
             _buttonClickedRenderer->stopAllActions();
-            Action *zoomAction = ScaleTo::create(0.05f, _pressedTextureScaleXInSize + 0.1f, _pressedTextureScaleYInSize + 0.1f);
+            Action *zoomAction = ScaleTo::create(0.05f, _pressedTextureScaleXInSize + _zoomScale, _pressedTextureScaleYInSize + _zoomScale);
             _buttonClickedRenderer->runAction(zoomAction);
-            _buttonNormalRenderer->setScale(_pressedTextureScaleXInSize + 0.1f, _pressedTextureScaleYInSize + 0.1f);
+            _buttonNormalRenderer->setScale(_pressedTextureScaleXInSize + _zoomScale, _pressedTextureScaleYInSize + _zoomScale);
         }
     }
     else
@@ -400,7 +404,7 @@ void Button::onPressStateChangedToPressed()
         else
         {
             _buttonNormalRenderer->stopAllActions();
-            _buttonNormalRenderer->setScale(_normalTextureScaleXInSize + 0.1f, _normalTextureScaleYInSize + 0.1f);
+            _buttonNormalRenderer->setScale(_normalTextureScaleXInSize +_zoomScale, _normalTextureScaleYInSize + _zoomScale);
         }
     }
 }
@@ -640,6 +644,16 @@ float Button::getTitleFontSize() const
 {
     return _fontSize;
 }
+    
+void Button::setZoomScale(float scale)
+{
+    _zoomScale = scale;
+}
+    
+float Button::getZoomScale()const
+{
+    return _zoomScale;
+}
 
 void Button::setTitleFontName(const std::string& fontName)
 {
@@ -690,6 +704,7 @@ void Button::copySpecialProperties(Widget *widget)
         setTitleFontSize(button->getTitleFontSize());
         setTitleColor(button->getTitleColor());
         setPressedActionEnabled(button->_pressedActionEnabled);
+        setZoomScale(button->_zoomScale);
     }
 }
 

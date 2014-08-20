@@ -24,6 +24,7 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "CCGLViewImpl.h"
+#include "CCApplication.h"
 #include "base/CCDirector.h"
 #include "base/CCTouch.h"
 #include "base/CCEventDispatcher.h"
@@ -31,6 +32,7 @@ THE SOFTWARE.
 #include "base/CCEventMouse.h"
 #include "base/CCIMEDispatcher.h"
 #include "base/ccUtils.h"
+#include "base/ccUTF8.h"
 
 #include <unordered_map>
 
@@ -98,6 +100,14 @@ public:
     static void setGLViewImpl(GLViewImpl* view)
     {
         _view = view;
+    }
+
+    static void onGLFWWindowIconifyCallback(GLFWwindow* window, int iconified)
+    {
+        if (_view)
+        {
+            _view->onGLFWWindowIconifyCallback(window, iconified);
+        }
     }
 
 private:
@@ -351,6 +361,7 @@ bool GLViewImpl::initWithRect(const std::string& viewName, Rect rect, float fram
     glfwSetWindowPosCallback(_mainWindow, GLFWEventHandler::onGLFWWindowPosCallback);
     glfwSetFramebufferSizeCallback(_mainWindow, GLFWEventHandler::onGLFWframebuffersize);
     glfwSetWindowSizeCallback(_mainWindow, GLFWEventHandler::onGLFWWindowSizeFunCallback);
+    glfwSetWindowIconifyCallback(_mainWindow, GLFWEventHandler::onGLFWWindowIconifyCallback);
 
     setFrameSize(rect.size.width, rect.size.height);
 
@@ -646,15 +657,20 @@ void GLViewImpl::onGLFWKeyCallback(GLFWwindow *window, int key, int scancode, in
         EventKeyboard event(g_keyCodeMap[key], GLFW_PRESS == action);
         auto dispatcher = Director::getInstance()->getEventDispatcher();
         dispatcher->dispatchEvent(&event);
-        if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
-            IMEDispatcher::sharedDispatcher()->dispatchDeleteBackward();
-        }
+    }
+    if (GLFW_RELEASE != action && g_keyCodeMap[key] == EventKeyboard::KeyCode::KEY_BACKSPACE)
+    {
+        IMEDispatcher::sharedDispatcher()->dispatchDeleteBackward();
     }
 }
 
 void GLViewImpl::onGLFWCharCallback(GLFWwindow *window, unsigned int character)
 {
-    IMEDispatcher::sharedDispatcher()->dispatchInsertText((const char*) &character, 1);
+    char16_t wcharString[2] = { (char16_t) character, 0 };
+    std::string utf8String;
+
+    StringUtils::UTF16ToUTF8( wcharString, utf8String );
+    IMEDispatcher::sharedDispatcher()->dispatchInsertText( utf8String.c_str(), utf8String.size() );
 }
 
 void GLViewImpl::onGLFWWindowPosCallback(GLFWwindow *windows, int x, int y)
@@ -697,6 +713,18 @@ void GLViewImpl::onGLFWWindowSizeFunCallback(GLFWwindow *window, int width, int 
     {
         updateDesignResolutionSize();
         Director::getInstance()->setViewport();
+    }
+}
+
+void GLViewImpl::onGLFWWindowIconifyCallback(GLFWwindow* window, int iconified)
+{
+    if (iconified == GL_TRUE)
+    {
+        Application::getInstance()->applicationDidEnterBackground();
+    }
+    else
+    {
+        Application::getInstance()->applicationWillEnterForeground();
     }
 }
 

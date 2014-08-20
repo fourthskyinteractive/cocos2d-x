@@ -102,6 +102,11 @@
 
 
 --------------------------------------------------------
+-- the cc Camera
+-- @field [parent=#cc] Camera#Camera Camera preloaded module
+
+
+--------------------------------------------------------
 -- the cc EventListenerTouchOneByOne
 -- @field [parent=#cc] EventListenerTouchOneByOne#EventListenerTouchOneByOne EventListenerTouchOneByOne preloaded module
 
@@ -1199,36 +1204,6 @@
 --------------------------------------------------------
 -- the cc Component
 -- @field [parent=#cc] Component#Component Component preloaded module
-
-
---------------------------------------------------------
--- the cc Sprite3D
--- @field [parent=#cc] Sprite3D#Sprite3D Sprite3D preloaded module
-
-
---------------------------------------------------------
--- the cc Mesh
--- @field [parent=#cc] Mesh#Mesh Mesh preloaded module
-
-
---------------------------------------------------------
--- the cc Animation3D
--- @field [parent=#cc] Animation3D#Animation3D Animation3D preloaded module
-
-
---------------------------------------------------------
--- the cc Animate3D
--- @field [parent=#cc] Animate3D#Animate3D Animate3D preloaded module
-
-
---------------------------------------------------------
--- the cc SubMeshState
--- @field [parent=#cc] SubMeshState#SubMeshState SubMeshState preloaded module
-
-
---------------------------------------------------------
--- the cc AttachNode
--- @field [parent=#cc] AttachNode#AttachNode AttachNode preloaded module
 
 
 --------------------------------------------------------
