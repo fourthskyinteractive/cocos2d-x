@@ -61,6 +61,7 @@ THE SOFTWARE.
 #include "base/CCIMEDelegate.h"
 #include "base/CCIMEDispatcher.h"
 #include "base/ccUtils.h"
+#include "base/CCCamera.h"
 
 // EventDispatcher
 #include "base/CCEventType.h"
@@ -267,6 +268,8 @@ THE SOFTWARE.
 #include "3d/CCAnimate3D.h"
 #include "3d/CCAnimation3D.h"
 #include "3d/CCSprite3DMaterial.h"
+#include "3d/CCSubMeshState.h"
+#include "3d/CCAttachNode.h"
 
 // Deprecated include
 #include "deprecated/CCDictionary.h"

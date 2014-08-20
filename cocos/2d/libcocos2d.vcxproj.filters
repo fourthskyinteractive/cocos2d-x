@@ -325,6 +325,12 @@
     <ClCompile Include="..\base\CCConsole.cpp">
       <Filter>base</Filter>
     </ClCompile>
+	<ClCompile Include="..\base\CCController.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+	<ClCompile Include="..\base\CCController-win32.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
     <ClCompile Include="..\base\CCData.cpp">
       <Filter>base</Filter>
     </ClCompile>
@@ -338,6 +344,9 @@
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="..\base\CCEventAcceleration.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+	<ClCompile Include="..\base\CCEventController.cpp">
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="..\base\CCEventCustom.cpp">
@@ -589,14 +598,29 @@
     <ClCompile Include="..\storage\local-storage\LocalStorage.cpp">
       <Filter>storage</Filter>
     </ClCompile>
+    <ClCompile Include="..\3d\CCAttachNode.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3d\CCSkeleton3D.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3d\CCSubMesh.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3d\CCSubMeshState.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
     <ClCompile Include="..\platform\desktop\CCGLViewImpl.cpp">
       <Filter>platform\desktop</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\CCGLView.cpp">
       <Filter>platform</Filter>
-    </ClCompile> 
+    </ClCompile>
     <ClCompile Include="CCProtectedNode.cpp">
       <Filter>2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\base\CCCamera.cpp">
+      <Filter>base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -880,6 +904,9 @@
     <ClInclude Include="..\base\CCConsole.h">
       <Filter>base</Filter>
     </ClInclude>
+	<ClInclude Include="..\base\CCController.h">
+      <Filter>base</Filter>
+    </ClInclude>
     <ClInclude Include="..\base\CCData.h">
       <Filter>base</Filter>
     </ClInclude>
@@ -893,6 +920,9 @@
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\base\CCEventAcceleration.h">
+      <Filter>base</Filter>
+    </ClInclude>
+	<ClInclude Include="..\base\CCEventController.h">
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\base\CCEventCustom.h">
@@ -1207,6 +1237,18 @@
     <ClInclude Include="..\storage\local-storage\LocalStorage.h">
       <Filter>storage</Filter>
     </ClInclude>
+    <ClInclude Include="..\3d\CCAttachNode.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3d\CCSkeleton3D.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3d\CCSubMesh.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3d\CCSubMeshState.h">
+      <Filter>3d</Filter>
+    </ClInclude>
     <ClInclude Include="..\platform\desktop\CCGLViewImpl.h">
       <Filter>platform\desktop</Filter>
     </ClInclude>
@@ -1215,6 +1257,9 @@
     </ClInclude>
     <ClInclude Include="CCProtectedNode.h">
       <Filter>2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\base\CCCamera.h">
+      <Filter>base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -27,7 +27,9 @@ THE SOFTWARE.
 #include <map>
 #include <cstdlib>
 
+#include "AudioController.h"
 #include "MciPlayer.h"
+#include "XAudio.h"
 #include "cocos2d.h"
 USING_NS_CC;
 
@@ -35,28 +37,23 @@ using namespace std;
 
 namespace CocosDenshion {
 
-typedef map<unsigned int, MciPlayer *> EffectList;
-typedef pair<unsigned int, MciPlayer *> Effect;
 
-static char     s_szRootPath[MAX_PATH];
-static DWORD    s_dwRootLen;
-static char     s_szFullPath[MAX_PATH];
+AudioController* s_audioController = NULL;
+// a flag that if the s_audioController should be re-initialized
+// see also in SimpleAudioEngine::end() in this file
+bool s_bAudioControllerNeedReInitialize = true;
 
-static std::string _FullPath(const char * szPath);
-static unsigned int _Hash(const char *key);
-
-#define BREAK_IF(cond)  if (cond) break;
-
-static EffectList& sharedList()
+static AudioController* sharedAudioController()
 {
-    static EffectList s_List;
-    return s_List;
-}
+	if ((!s_audioController) || s_bAudioControllerNeedReInitialize)
+	{
+		s_audioController = new MciAudioController;
+		s_audioController->Initialize();
+		s_audioController->CreateResources();
+		s_bAudioControllerNeedReInitialize = false;
+	}
 
-static MciPlayer& sharedMusic()
-{
-    static MciPlayer s_Music;
-    return s_Music;
+	return s_audioController;
 }
 
 SimpleAudioEngine::SimpleAudioEngine()
@@ -75,17 +72,11 @@ SimpleAudioEngine* SimpleAudioEngine::getInstance()
 
 void SimpleAudioEngine::end()
 {
-    sharedMusic().Close();
-
-    EffectList::iterator p = sharedList().begin();
-    while (p != sharedList().end())
-    {
-        delete p->second;
-        p->second = NULL;
-        p++;
-    }   
-    sharedList().clear();
-    return;
+	sharedAudioController()->StopBackgroundMusic(true);
+	sharedAudioController()->StopAllSoundEffects();
+	sharedAudioController()->ReleaseResources();
+	//set here to tell the s_bAudioControllerNeedReInitialize should be re-initialized
+	s_bAudioControllerNeedReInitialize = true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -94,40 +85,32 @@ void SimpleAudioEngine::end()
 
 void SimpleAudioEngine::playBackgroundMusic(const char* pszFilePath, bool bLoop)
 {
-    if (! pszFilePath)
-    {
-        return;
-    }
+	if (!pszFilePath)
+	{
+		return;
+	}
 
-    sharedMusic().Open(_FullPath(pszFilePath).c_str(), _Hash(pszFilePath));
-    sharedMusic().Play((bLoop) ? -1 : 1);
+	sharedAudioController()->PlayBackgroundMusic(pszFilePath, bLoop);
 }
 
 void SimpleAudioEngine::stopBackgroundMusic(bool bReleaseData)
 {
-    if (bReleaseData)
-    {
-        sharedMusic().Close();
-    }
-    else
-    {
-        sharedMusic().Stop();
-    }
+	sharedAudioController()->StopBackgroundMusic(bReleaseData);
 }
 
 void SimpleAudioEngine::pauseBackgroundMusic()
 {
-    sharedMusic().Pause();
+	sharedAudioController()->PauseBackgroundMusic();
 }
 
 void SimpleAudioEngine::resumeBackgroundMusic()
 {
-    sharedMusic().Resume();
+	sharedAudioController()->ResumeBackgroundMusic();
 }
 
 void SimpleAudioEngine::rewindBackgroundMusic()
 {
-    sharedMusic().Rewind();
+	sharedAudioController()->RewindBackgroundMusic();
 }
 
 bool SimpleAudioEngine::willPlayBackgroundMusic()
@@ -137,7 +120,7 @@ bool SimpleAudioEngine::willPlayBackgroundMusic()
 
 bool SimpleAudioEngine::isBackgroundMusicPlaying()
 {
-    return sharedMusic().IsPlaying();
+	return sharedAudioController()->IsBackgroundMusicPlaying();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -147,94 +130,46 @@ bool SimpleAudioEngine::isBackgroundMusicPlaying()
 unsigned int SimpleAudioEngine::playEffect(const char* pszFilePath, bool bLoop,
                                            float pitch, float pan, float gain)
 {
-    unsigned int nRet = _Hash(pszFilePath);
+	unsigned int sound;
+	sharedAudioController()->PlaySoundEffect(pszFilePath, bLoop, sound);
 
-    preloadEffect(pszFilePath);
-
-    EffectList::iterator p = sharedList().find(nRet);
-    if (p != sharedList().end())
-    {
-        p->second->Play((bLoop) ? -1 : 1);
-    }
-
-    return nRet;
+	return sound;
 }
 
 void SimpleAudioEngine::stopEffect(unsigned int nSoundId)
 {
-    EffectList::iterator p = sharedList().find(nSoundId);
-    if (p != sharedList().end())
-    {
-        p->second->Stop();
-    }
+	sharedAudioController()->StopSoundEffect(nSoundId);
 }
 
 void SimpleAudioEngine::preloadEffect(const char* pszFilePath)
 {
-    int nRet = 0;
-    do 
-    {
-        BREAK_IF(! pszFilePath);
-
-        nRet = _Hash(pszFilePath);
-
-        BREAK_IF(sharedList().end() != sharedList().find(nRet));
-
-        sharedList().insert(Effect(nRet, new MciPlayer()));
-        MciPlayer * pPlayer = sharedList()[nRet];
-        pPlayer->Open(_FullPath(pszFilePath).c_str(), nRet);
-
-        BREAK_IF(nRet == pPlayer->GetSoundID());
-
-        delete pPlayer;
-        sharedList().erase(nRet);
-        nRet = 0;
-    } while (0);
+	sharedAudioController()->PreloadSoundEffect(pszFilePath);
 }
 
 void SimpleAudioEngine::pauseEffect(unsigned int nSoundId)
 {
-    EffectList::iterator p = sharedList().find(nSoundId);
-    if (p != sharedList().end())
-    {
-        p->second->Pause();
-    }
+	sharedAudioController()->PauseSoundEffect(nSoundId);
+}
+
+
+void SimpleAudioEngine::resumeEffect(unsigned int nSoundId)
+{
+	sharedAudioController()->ResumeSoundEffect(nSoundId);
 }
 
 void SimpleAudioEngine::pauseAllEffects()
 {
-    EffectList::iterator iter;
-    for (iter = sharedList().begin(); iter != sharedList().end(); iter++)
-    {
-        iter->second->Pause();
-    }
-}
-
-void SimpleAudioEngine::resumeEffect(unsigned int nSoundId)
-{
-    EffectList::iterator p = sharedList().find(nSoundId);
-    if (p != sharedList().end())
-    {
-        p->second->Resume();
-    }
+	sharedAudioController()->PauseAllSoundEffects();
 }
 
 void SimpleAudioEngine::resumeAllEffects()
 {
-    EffectList::iterator iter;
-    for (iter = sharedList().begin(); iter != sharedList().end(); iter++)
-    {
-        iter->second->Resume();
-    }
+	sharedAudioController()->ResumeAllSoundEffects();
 }
 
 void SimpleAudioEngine::stopAllEffects()
 {
-    EffectList::iterator iter;
-    for (iter = sharedList().begin(); iter != sharedList().end(); iter++)
-    {
-        iter->second->Stop();
-    }
+	sharedAudioController()->StopAllSoundEffects();
 }
 
 void SimpleAudioEngine::preloadBackgroundMusic(const char* pszFilePath)
@@ -244,15 +179,7 @@ void SimpleAudioEngine::preloadBackgroundMusic(const char* pszFilePath)
 
 void SimpleAudioEngine::unloadEffect(const char* pszFilePath)
 {
-    unsigned int nID = _Hash(pszFilePath);
-
-    EffectList::iterator p = sharedList().find(nID);
-    if (p != sharedList().end())
-    {
-        delete p->second;
-        p->second = NULL;
-        sharedList().erase(nID);
-    }    
+	sharedAudioController()->UnloadSoundEffect(pszFilePath);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -261,43 +188,24 @@ void SimpleAudioEngine::unloadEffect(const char* pszFilePath)
 
 float SimpleAudioEngine::getBackgroundMusicVolume()
 {
-    return 1.0;
+    //return 1.0;
+	return sharedAudioController()->GetBackgroundVolume();
 }
 
 void SimpleAudioEngine::setBackgroundMusicVolume(float volume)
 {
+	sharedAudioController()->SetBackgroundVolume((volume <= 0.0f) ? 0.0f : volume);
 }
 
 float SimpleAudioEngine::getEffectsVolume()
 {
-    return 1.0;
+    //return 1.0;
+	return sharedAudioController()->GetSoundEffectVolume();
 }
 
 void SimpleAudioEngine::setEffectsVolume(float volume)
 {
-}
-
-//////////////////////////////////////////////////////////////////////////
-// static function
-//////////////////////////////////////////////////////////////////////////
-
-static std::string _FullPath(const char * szPath)
-{
-    return FileUtils::getInstance()->fullPathForFilename(szPath);
-}
-
-unsigned int _Hash(const char *key)
-{
-    unsigned int len = strlen(key);
-    const char *end=key+len;
-    unsigned int hash;
-
-    for (hash = 0; key < end; key++)
-    {
-        hash *= 16777619;
-        hash ^= (unsigned int) (unsigned char) toupper(*key);
-    }
-    return (hash);
+	sharedAudioController()->SetSoundEffectVolume((volume <= 0.0f) ? 0.0f : volume);
 }
 
 } // end of namespace CocosDenshion
