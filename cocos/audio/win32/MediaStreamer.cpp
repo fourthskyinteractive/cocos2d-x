@@ -5,11 +5,35 @@
 ////
 //// Copyright (c) Microsoft Corporation. All rights reserved
 
+#define INITGUID 1
+
 #include "MediaStreamer.h"
 #include <exception>
 #include <wchar.h>
+#include <mutex>
 
-HANDLE mfLibrary = nullptr;
+
+#include <mfapi.h>
+#include <mfidl.h>
+#include <mfreadwrite.h>
+
+// Media Framework helper objects
+static GUID _GUID_NULL = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
+
+HMODULE mfPlatLibrary = nullptr;
+typedef HRESULT(STDAPICALLTYPE *MFStartupFunc)(ULONG Version, DWORD dwFlags/* = MFSTARTUP_FULL*/);
+typedef HRESULT(STDAPICALLTYPE *MFCreateMediaTypeFunc)(IMFMediaType**  ppMFType);
+typedef HRESULT(STDAPICALLTYPE *MFCreateWaveFormatExFromMFMediaTypeFunc)(IMFMediaType* pMFType, WAVEFORMATEX** ppWF, UINT32* pcbSize, UINT32 Flags/* = MFWaveFormatExConvertFlag_Normal*/);
+MFStartupFunc _MFStartup;
+MFCreateMediaTypeFunc _MFCreateMediaType;
+MFCreateWaveFormatExFromMFMediaTypeFunc _MFCreateWaveFormatExFromMFMediaType;
+
+HMODULE mfReadWriteLibrary = nullptr;
+typedef HRESULT(STDAPICALLTYPE *MFCreateSourceReaderFromURLFunc)(LPCWSTR pwszURL, IMFAttributes *pAttributes, IMFSourceReader **ppSourceReader);
+MFCreateSourceReaderFromURLFunc _MFCreateSourceReaderFromURL;
+
+
+std::mutex init_mutex;
 
 static inline void ThrowIfFailed(HRESULT hr)
 {
@@ -19,7 +43,6 @@ static inline void ThrowIfFailed(HRESULT hr)
 		throw std::exception();
 	}
 }
-
 
 MediaStreamer::MediaStreamer()
 {
@@ -66,22 +89,42 @@ void MediaStreamer::Initialize(__in const WCHAR* url)
 		wcscat_s(filePath, url);
 	}
 
+	// Init Media Framework
+	{
+		std::lock_guard<std::mutex> lock(init_mutex);
+
+		if (mfReadWriteLibrary == nullptr || mfReadWriteLibrary == nullptr)
+		{
+			mfPlatLibrary = LoadLibrary(TEXT("MFPlat.dll"));
+			if (mfPlatLibrary == nullptr)
+			{
+				CCLOG("Could not find MFPlay library");
+				return;
+			}
+			_MFStartup = (MFStartupFunc)GetProcAddress(mfPlatLibrary, "MFStartup");
+			_MFCreateMediaType = (MFCreateMediaTypeFunc)GetProcAddress(mfPlatLibrary, "MFCreateMediaType");
+			_MFCreateWaveFormatExFromMFMediaType = (MFCreateWaveFormatExFromMFMediaTypeFunc)GetProcAddress(mfPlatLibrary, "MFCreateWaveFormatExFromMFMediaType");
+
+			mfReadWriteLibrary = LoadLibrary(TEXT("MFReadWrite.dll"));
+			if (mfReadWriteLibrary == nullptr)
+			{
+				CCLOG("Could not find MFReadWrite library");
+				return;
+			}
+			_MFCreateSourceReaderFromURL = (MFCreateSourceReaderFromURLFunc) GetProcAddress(mfReadWriteLibrary, "MFCreateSourceReaderFromURL");
+
+		}
+	}
+
 	IMFMediaType* outputMediaType;
 	IMFMediaType* mediaType;
 
-	// Load needed functions from Media Framework (MFStartup, MFCreateSourceReaderFromURL)
-	//MFStartup
-	//MFCreateSourceReaderFromURL
-	//MFCreateMediaType
-	//MFCreateWaveFormatExFromMFMediaType
-	//
-
 	ThrowIfFailed(
-		MFStartup(MF_VERSION)
+		_MFStartup(MF_VERSION, MFSTARTUP_FULL)
 		);
 
 	ThrowIfFailed(
-		MFCreateSourceReaderFromURL(filePath, nullptr, &m_reader)
+		_MFCreateSourceReaderFromURL(filePath, nullptr, &m_reader)
 		);
 
 	// Set the decoded output format as PCM
@@ -89,7 +132,7 @@ void MediaStreamer::Initialize(__in const WCHAR* url)
 	// When using MF, this sample always decodes into PCM.
 
 	ThrowIfFailed(
-		MFCreateMediaType(&mediaType)
+		_MFCreateMediaType(&mediaType)
 		);
 
 	ThrowIfFailed(
@@ -112,7 +155,7 @@ void MediaStreamer::Initialize(__in const WCHAR* url)
 	UINT32 formatSize = 0;
 	WAVEFORMATEX* waveFormat;
 	ThrowIfFailed(
-		MFCreateWaveFormatExFromMFMediaType(outputMediaType, &waveFormat, &formatSize)
+		_MFCreateWaveFormatExFromMFMediaType(outputMediaType, &waveFormat, &formatSize, MFWaveFormatExConvertFlag_Normal)
 		);
 	CopyMemory(&m_waveFormat, waveFormat, sizeof(m_waveFormat));
 	CoTaskMemFree(waveFormat);
@@ -234,7 +277,7 @@ void MediaStreamer::Restart()
 	var.vt = VT_I8;
 
 	ThrowIfFailed(
-		m_reader->SetCurrentPosition(GUID_NULL, var)
+		m_reader->SetCurrentPosition(_GUID_NULL, var)
 		);
 
 }

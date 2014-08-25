@@ -47,7 +47,8 @@ static AudioController* sharedAudioController()
 {
 	if ((!s_audioController) || s_bAudioControllerNeedReInitialize)
 	{
-		s_audioController = new MciAudioController;
+		//s_audioController = new MciAudioController;
+		s_audioController = new XAudioController;
 		s_audioController->Initialize();
 		s_audioController->CreateResources();
 		s_bAudioControllerNeedReInitialize = false;

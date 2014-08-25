@@ -116,7 +116,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\sqlite3\libraries\win32\*.*" "$(OutDir)
       <ImportLibrary>$(TargetDir)$(TargetName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
       <ModuleDefinitionFile>cocos2d.def</ModuleDefinitionFile>
-      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -158,7 +158,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
 </Command>
     </PreLinkEvent>
     <Link>
-      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libchipmunk.lib;sqlite3.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries> ;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -204,6 +204,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClCompile Include="..\base\CCEventKeyboard.cpp" />
     <ClCompile Include="..\base\CCEventListener.cpp" />
     <ClCompile Include="..\base\CCEventListenerAcceleration.cpp" />
+	<ClCompile Include="..\base\CCEventListenerController.cpp" />
     <ClCompile Include="..\base\CCEventListenerCustom.cpp" />
     <ClCompile Include="..\base\CCEventListenerFocus.cpp" />
     <ClCompile Include="..\base\CCEventListenerKeyboard.cpp" />
@@ -386,6 +387,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClInclude Include="..\base\CCEventKeyboard.h" />
     <ClInclude Include="..\base\CCEventListener.h" />
     <ClInclude Include="..\base\CCEventListenerAcceleration.h" />
+	<ClInclude Include="..\base\CCEventListenerController.h" />
     <ClInclude Include="..\base\CCEventListenerCustom.h" />
     <ClInclude Include="..\base\CCEventListenerFocus.h" />
     <ClInclude Include="..\base\CCEventListenerKeyboard.h" />

@@ -364,6 +364,9 @@
     <ClCompile Include="..\base\CCEventListenerAcceleration.cpp">
       <Filter>base</Filter>
     </ClCompile>
+	<ClCompile Include="..\base\CCEventListenerController.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
     <ClCompile Include="..\base\CCEventListenerCustom.cpp">
       <Filter>base</Filter>
     </ClCompile>
@@ -917,6 +920,9 @@
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\base\CCEventListenerAcceleration.h">
+      <Filter>base</Filter>
+    </ClInclude>
+	<ClInclude Include="..\base\CCEventListenerController.h">
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\base\CCEventListenerCustom.h">

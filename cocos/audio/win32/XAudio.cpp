@@ -10,8 +10,9 @@
 #include "XAudio.h"
 #include "MediaStreamer.h"
 
-typedef HRESULT (*_XAudio2CreateFunc)(IXAudio2**, UINT32, XAUDIO2_PROCESSOR);
-_XAudio2CreateFunc _XAudio2Create;
+HMODULE xAudioDLL = nullptr;
+typedef HRESULT (STDAPICALLTYPE *__XAudio2CreateFunc)(IXAudio2**, UINT32, XAUDIO2_PROCESSOR);
+__XAudio2CreateFunc __XAudioCreate;
 
 static std::wstring CCUtf8ToUnicode(const char * pszUtf8Str, unsigned len/* = -1*/)
 {
@@ -104,10 +105,26 @@ void XAudioController::Initialize()
 
 void XAudioController::CreateResources()
 {
+	if (xAudioDLL == nullptr)
+	{
+		xAudioDLL = LoadLibrary(TEXT("XAudio2_8.dll"));
+		if (xAudioDLL == nullptr)
+		{
+			xAudioDLL = LoadLibrary(TEXT("XAudio2_7.dll"));
+			if (xAudioDLL == nullptr)
+			{
+				CCLOG("Cannot load XAudio library");
+				return;
+			}
+		}
+
+		__XAudioCreate = (__XAudio2CreateFunc)GetProcAddress(xAudioDLL, "XAudio2Create");
+	}
+
     try
     {	
 		ThrowIfFailed(
-			_XAudio2Create(&m_musicEngine, 0, XAUDIO2_DEFAULT_PROCESSOR)
+			__XAudioCreate(&m_musicEngine, 0, XAUDIO2_DEFAULT_PROCESSOR)
 			);
 
 #if defined(_DEBUG)
@@ -140,7 +157,7 @@ void XAudioController::CreateResources()
 	    // We are creating an entirely new engine instance and mastering voice in order to tag
 	    // our sound effects with the audio category AudioCategory_GameEffects.
 	    ThrowIfFailed(
-		    XAudio2Create(&m_soundEffectEngine)
+			__XAudioCreate(&m_soundEffectEngine, 0, XAUDIO2_DEFAULT_PROCESSOR)
 		    );
     
         m_soundEffectEngineCallback.Initialize(this);

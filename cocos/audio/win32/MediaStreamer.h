@@ -11,9 +11,8 @@
 #include "CCStdC.h"
 #include <string>
 
-#include <mfapi.h>
-#include <mfidl.h>
-#include <mfreadwrite.h>
+struct IMFSourceReader;
+struct IMFMediaType;
 
 class MediaStreamer
 {
