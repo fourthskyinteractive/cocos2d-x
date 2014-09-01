@@ -195,7 +195,7 @@ Vec2 GLView::getVisibleOrigin() const
         return Vec2::ZERO;
     }
 }
-
+/*
 void GLView::setViewPortInPoints(float x , float y , float w , float h)
 {
     glViewport((GLint)(x * _scaleX + _viewPortRect.origin.x),
@@ -227,7 +227,7 @@ Rect GLView::getScissorRect() const
 	float h = params[3] / _scaleY;
 	return Rect(x, y, w, h);
 }
-
+*/
 void GLView::setViewName(const std::string& viewname )
 {
     _viewName = viewname;

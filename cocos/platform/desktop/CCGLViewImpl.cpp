@@ -547,6 +547,22 @@ void GLViewImpl::setScissorInPoints(float x , float y , float w , float h)
                (GLsizei)(h * _scaleY * _retinaFactor * _frameZoomFactor));
 }
 
+bool GLView::isScissorEnabled()
+{
+	return (GL_FALSE == glIsEnabled(GL_SCISSOR_TEST)) ? false : true;
+}
+
+Rect GLView::getScissorRect() const
+{
+	GLfloat params[4];
+	glGetFloatv(GL_SCISSOR_BOX, params);
+	float x = (params[0] - _viewPortRect.origin.x) / _scaleX;
+	float y = (params[1] - _viewPortRect.origin.y) / _scaleY;
+	float w = params[2] / _scaleX;
+	float h = params[3] / _scaleY;
+	return Rect(x, y, w, h);
+}
+
 void GLViewImpl::onGLFWError(int errorID, const char* errorDesc)
 {
     CCLOGERROR("GLFWError #%d Happen, %s\n", errorID, errorDesc);
@@ -726,6 +742,50 @@ void GLViewImpl::onGLFWWindowIconifyCallback(GLFWwindow* window, int iconified)
     {
         Application::getInstance()->applicationWillEnterForeground();
     }
+}
+
+BufferImpl* GLViewImpl::createBuffer(BufferImpl::BufferType type, int size, bool dynamic)
+{
+	auto buff = new (std::nothrow) GLBufferImpl();
+	if (buff && buff->init(type, size, dynamic))
+	{
+		buff->autorelease();
+		return buff;
+	}
+	CC_SAFE_DELETE(buff);
+	return nullptr;	
+}
+	
+TextureImpl* GLViewImpl::createTexture(TextureImpl::TextureType type, 
+									   Texture2D::PixelFormat format,
+									   int width, 
+									   int height, 
+									   int depth, 
+									   int numMipLevels, 
+									   int slices, 
+									   int sampleCount)
+{
+	
+}
+	
+VertexDeclarationImpl* GLViewImpl::createVertexDeclaration()
+{
+	
+}
+
+ProgramImpl* GLViewImpl::createProgram(const char* vertexShader, const char* fragmentShader)
+{
+	
+}
+
+void GLViewImpl::draw(int primitiveType, int vertexStart, int vertexCount)
+{
+	
+}
+
+void GLViewImpl::drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount)
+{
+	
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)

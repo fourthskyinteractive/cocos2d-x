@@ -40,6 +40,17 @@ NS_CC_BEGIN
 struct Color4B;
 struct Color4F;
 
+typedef enum PrimitiveType
+{
+	Point = 0,
+	Line,
+	LineStrip,
+	Triangle,
+	TriangleStrip,
+	
+	PrimitiveMax
+};
+
 /** RGB color composed of bytes 3 bytes
 @since v3.0
  */

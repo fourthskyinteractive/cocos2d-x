@@ -31,6 +31,8 @@ THE SOFTWARE.
 
 #include <vector>
 
+#include "platform/CCGLViewObjects.h"
+
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #include <windows.h>
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
@@ -175,22 +177,22 @@ public:
     /**
      * Set opengl view port rectangle with points.
      */
-    virtual void setViewPortInPoints(float x , float y , float w , float h);
+    virtual void setViewPortInPoints(float x , float y , float w , float h) = 0;
 
     /**
      * Set Scissor rectangle with points.
      */
-    virtual void setScissorInPoints(float x , float y , float w , float h);
+    virtual void setScissorInPoints(float x , float y , float w , float h) = 0;
 
     /**
      * Get whether GL_SCISSOR_TEST is enable
      */
-    virtual bool isScissorEnabled();
+    virtual bool isScissorEnabled() = 0;
 
     /**
      * Get the current scissor rectangle
      */
-    virtual Rect getScissorRect() const;
+    virtual Rect getScissorRect() const = 0;
 
     virtual void setViewName(const std::string& viewname);
     const std::string& getViewName() const;
@@ -244,6 +246,39 @@ protected:
     float _scaleX;
     float _scaleY;
     ResolutionPolicy _resolutionPolicy;
+	
+	
+	/**
+	 *	View dependant objects builders
+	 */
+	virtual BufferImpl* createBuffer(BufferImpl::BufferType type, 
+									 int sizeInBytes) = 0;
+	
+	virtual TextureImpl* createTexture(TextureImpl::TextureType type, 
+									   Texture2D::PixelFormat format,
+									   int width, 
+									   int height, 
+									   int depth = 0, 
+									   int numMipLevels = 0, 
+									   int slices = 1, 
+									   int sampleCount = 1) = 0;
+	
+	virtual VertexDeclarationImpl* createVertexDeclaration() = 0;
+	
+	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader) = 0;
+	
+	virtual void draw(int primitiveType, int vertexStart, int vertexCount) = 0;
+	
+	virtual void drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) = 0;
+	
+	/**
+	 *	Make friend the classes that will use the internal implementations
+	 */
+	friend class VertexBuffer;
+	friend class IndexBuffer;
+	friend class VertexData;
+	friend class GLProgram;
+	friend class Texture2D;
 };
 
 // end of platform group

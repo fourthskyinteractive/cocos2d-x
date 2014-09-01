@@ -72,7 +72,8 @@ public:
 
     virtual void setViewPortInPoints(float x , float y , float w , float h);
     virtual void setScissorInPoints(float x , float y , float w , float h);
-
+	virtual bool isScissorEnabled();
+    virtual Rect getScissorRect();
 
     bool windowShouldClose();
     void pollEvents();
@@ -147,6 +148,29 @@ protected:
     float _mouseY;
 
     friend class GLFWEventHandler;
+	
+	
+	/**
+	 *	View dependant objects builders
+	 */
+	virtual BufferImpl* createBuffer(BufferImpl::BufferType type, int sizeInBytes, bool dynamic = false);
+	
+	virtual TextureImpl* createTexture(TextureImpl::TextureType type, 
+									   Texture2D::PixelFormat format,
+									   int width, 
+									   int height, 
+									   int depth = 0, 
+									   int numMipLevels = 0, 
+									   int slices = 1, 
+									   int sampleCount = 1);
+	
+	virtual VertexDeclarationImpl* createVertexDeclaration();
+	
+	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader);
+	
+	virtual void draw(int primitiveType, int vertexStart, int vertexCount);
+	
+	virtual void drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount);
 
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(GLViewImpl);
