@@ -70,10 +70,10 @@ public:
     float getFrameZoomFactor() const;
     //void centerWindow();
 
-    virtual void setViewPortInPoints(float x , float y , float w , float h);
-    virtual void setScissorInPoints(float x , float y , float w , float h);
-	virtual bool isScissorEnabled();
-    virtual Rect getScissorRect();
+    virtual void setViewPortInPoints(float x , float y , float w , float h) override;
+    virtual void setScissorInPoints(float x , float y , float w , float h) override;
+	virtual bool isScissorEnabled() override;
+    virtual Rect getScissorRect() override;
 
     bool windowShouldClose();
     void pollEvents();
@@ -153,7 +153,7 @@ protected:
 	/**
 	 *	View dependant objects builders
 	 */
-	virtual BufferImpl* createBuffer(BufferImpl::BufferType type, int sizeInBytes, bool dynamic = false);
+	virtual BufferImpl* createBuffer(BufferImpl::BufferType type, int sizeInBytes, bool dynamic = false) override;
 	
 	virtual TextureImpl* createTexture(TextureImpl::TextureType type, 
 									   Texture2D::PixelFormat format,
@@ -162,15 +162,15 @@ protected:
 									   int depth = 0, 
 									   int numMipLevels = 0, 
 									   int slices = 1, 
-									   int sampleCount = 1);
+									   int sampleCount = 1) override;
 	
-	virtual VertexDeclarationImpl* createVertexDeclaration();
+	virtual VertexDeclarationImpl* createVertexDeclaration() override;
 	
-	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader);
+	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader) override;
 	
-	virtual void draw(int primitiveType, int vertexStart, int vertexCount);
+	virtual void draw(int primitiveType, int vertexStart, int vertexCount) override;
 	
-	virtual void drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount);
+	virtual void drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) override;
 
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(GLViewImpl);

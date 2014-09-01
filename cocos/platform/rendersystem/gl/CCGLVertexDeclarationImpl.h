@@ -24,50 +24,75 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
 
-#ifndef __CC_EGLBufferIMPL_H__
-#define __CC_EGLBufferIMPL_H__
+#ifndef __CC_EGLVertexDeclarationIMPL_H__
+#define __CC_EGLVertexDeclarationIMPL_H__
 
 #include "CCGLViewObjects.h"
+#include "platform/rendersystem/gl/CCGLBufferImpl.h"
 
 NS_CC_BEGIN
 
-class GLBufferImpl : public BufferImpl
+class GLVertexDeclarationImpl : public VertexDeclarationImpl
 {
 public:
-	
-	GLBufferImpl();
-	~GLBufferImpl();
+	GLVertexDeclarationImpl();
+	~GLVertexDeclarationImpl();
 	
 	// Specific query methods
-	GLuint getBufferName() const { return mBufferName; }
-	GLenum getBufferTarget() const { return mBufferTarget; }
-	virtual unsigned int getSizeInBytes() const override { return mSizeInBytes; }
 	
-	// 
-	virtual bool init(BufferImpl::BufferType type, unsigned int sizeInBytes, bool dynamic = false) override;
 	
-	//
+	virtual bool init() override;
+	
 	virtual bool recreate() override;
 
-	//
-	virtual void* map() override;
+	virtual void begin() override;
+ 
+	virtual bool setStream(BufferImpl* buffer, 
+						   int offset, 
+						   int semantic, 
+						   ElementType type, 
+						   int stride, 
+						   bool normalize = false) override;
 	
-	// 
-	virtual void unmap() override;
+	virtual void build() override;
 	
-	// 
-	virtual void updateData(const void* data, int start, int dataSize) override;
-	
-protected;
-	mutable GLuint mBufferName;
-	mutable GLenum mBufferTarget
-	GLenum mBufferAccess;
-	
-	mutable unsigned int mSizeInBytes;
-	bool mDynamic;
+protected:
+	unsigned int mStreamIndex;
 	
 private:
-	CC_DISALLOW_COPY_AND_ASSIGN(GLBufferImpl);
+	CC_DISALLOW_COPY_AND_ASSIGN(GLVertexDeclarationImpl);
+};
+
+class GLVertexDeclarationVAOImpl : public VertexDeclarationImpl
+{
+public:
+	GLVertexDeclarationVAOImpl();
+	~GLVertexDeclarationVAOImpl();
+	
+	// Specific query methods
+	GLuint getVertexArray() const { return mVertexArrayObject; }
+	
+	virtual bool init() override;
+	
+	virtual bool recreate() override;
+
+	virtual void begin() override;
+ 
+	virtual bool setStream(BufferImpl* buffer, 
+						   int offset, 
+						   int semantic, 
+						   ElementType type, 
+						   int stride, 
+						   bool normalize = false) override;
+	
+	virtual void build() override;
+	
+protected:
+	mutable GLuint mVertexArrayObject;
+	unsigned int mStreamIndex;
+	
+private:
+	CC_DISALLOW_COPY_AND_ASSIGN(GLVertexDeclarationVAOImpl);
 };
 
 NS_CC_END

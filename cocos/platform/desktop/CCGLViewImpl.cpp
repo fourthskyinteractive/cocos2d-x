@@ -765,17 +765,47 @@ TextureImpl* GLViewImpl::createTexture(TextureImpl::TextureType type,
 									   int slices, 
 									   int sampleCount)
 {
-	
+	auto tex = new (std::nothrow) GLTexture2DImpl();
+	if (tex && tex->init(type, format, width, height, depth, numMipLevels, slices, sampleCount))
+	{
+		tex->autorelease();
+		return tex;
+	}
+	CC_SAFE_DELETE(tex);
+	return nullptr;	
 }
 	
 VertexDeclarationImpl* GLViewImpl::createVertexDeclaration()
 {
+	VertexDeclarationImpl* decl = nullptr;
+	if (Configuration::getInstance()->supportsShareableVAO())
+    {
+		decl = new (std::nothrow) GLVertexDeclarationVAOImpl();
+	}
+	else
+	{
+		decl = new (std::nothrow) GLVertexDeclarationImpl();
+	}
 	
+	if (decl && decl->init())
+	{
+		decl->autorelease();
+		return decl;
+	}
+	CC_SAFE_DELETE(decl);
+	return nullptr;	
 }
 
 ProgramImpl* GLViewImpl::createProgram(const char* vertexShader, const char* fragmentShader)
 {
-	
+	auto prog = new (std::nothrow) GLProgramImpl();
+	if (prog && prog->init(vertexShader, fragmentShader))
+	{
+		prog->autorelease();
+		return prog;
+	}
+	CC_SAFE_DELETE(prog);
+	return nullptr;	
 }
 
 void GLViewImpl::draw(int primitiveType, int vertexStart, int vertexCount)

@@ -1,6 +1,7 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2013-2014 Chukong Technologies Inc.
+Copyright (c) 2014 Evandro Paulino
 
 http://www.cocos2d-x.org
 
@@ -35,7 +36,7 @@ class ResourceImpl : public Ref
 {
 public:
 	// 
-	virtual bool recreate() const = 0;
+	virtual bool recreate() = 0;
 	
 };
 
@@ -74,12 +75,6 @@ public:
 	// Update buffer data with specific amount of data
 	virtual void updateData(const void* data, int start, int dataSize) = 0;
 	
-	// Read buffer data
-	//virtual void readData(void* data) = 0;
-	
-	// Read specific amount of buffer data 
-	//virtual void readData(void* data, int start, int dataSize) = 0;
-	
 protected:
 	static bool _enableShadowCopy;
 	
@@ -107,11 +102,12 @@ public:
 	};
 	
 	// Constructor and destructor
-	TextureImpl() : _type(ShaderResource) { }
+	TextureImpl() : _type(ShaderResource), _pixelFormat(PixelFormat::AUTO) { }
 	virtual ~TextureImpl() { }
 	
 	// Query methods
 	TextureType getType() const { return _type; }
+	Texture2D::PixelFormat getPixelFormat() const { return _pixelFormat; }
 	virtual unsigned int getWidthInBytes() const = 0;
 	virtual unsigned int getHeightInBytes() const = 0;
 	virtual unsigned int getDepthInBytes() const = 0;
@@ -120,7 +116,14 @@ public:
 	virtual unsigned int getNumSlices() const = 0;
 	
 	// Init texture
-	virtual bool init() = 0;
+	virtual bool init(TextureImpl::TextureType type, 
+					   Texture2D::PixelFormat format,
+					   int width, 
+					   int height, 
+					   int depth = 0, 
+					   int numMipLevels = 0, 
+					   int sampleCount = 1,
+					   int slices = 1) = 0;
 	
 	// 
 	virtual void generateMips() = 0;
@@ -139,12 +142,16 @@ public:
 	
 protected:
 	mutable TextureType _type;
+	mutable Texture2D::PixelFormat _pixelFormat;
 	
 };
 
 class VertexDeclarationImpl : public Ref
 {
 public:
+	// 
+	virtual bool init() = 0;
+	
 	//
 	virtual void begin() = 0;
 
@@ -152,8 +159,8 @@ public:
 	virtual bool setStream(BufferImpl* buffer, 
 						   int offset, 
 						   int semantic, 
-						   int type, 
-						   int size, 
+						   ElementType type, 
+						   int stride, 
 						   bool normalize) = 0;
 	
 	// 

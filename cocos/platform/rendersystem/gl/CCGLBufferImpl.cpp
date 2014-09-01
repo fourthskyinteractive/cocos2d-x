@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
 
-#include "CCGLBuffer.h"
+#include "platform/rendersystem/gl/CCGLBufferImpl.h"
 
 NS_CC_BEGIN
 
@@ -35,20 +35,22 @@ bool GLBufferImpl::_enableShadowCopy = false;
 #endif
 
 GLBufferImpl::GLBufferImpl()
-	: mBuffer(0)
+	: BufferImpl()
+	, mBufferName(0)
 	, mBufferTarget(0)
 	, mBufferAccess(0)
 	, mSizeInBytes(0)
+	, mDynamic(false)
 {
 	
 }
 
 GLBufferImpl::~GLBufferImpl()
 {
-	if (mBuffer != 0)
+	if (mBufferName != 0)
 	{
-		glDeleteBuffers(1, &mBuffer);
-		mBuffer = 0;
+		glDeleteBuffers(1, &mBufferName);
+		mBufferName = 0;
 	}
 }
 
@@ -93,8 +95,8 @@ bool GLBufferImpl::init(BufferImpl::BufferType type, unsigned int sizeInBytes, b
 //
 bool GLBufferImpl::recreate() const
 {
-	glGenBuffers(1, &mBuffer);
-	glBindBuffer(mTarget, mBuffer);
+	glGenBuffers(1, &mBufferName);
+	glBindBuffer(mTarget, mBufferName);
 	
 	if (GLBufferImpl::_enableShadowCopy == true && _shadowCopy.size() > 0)
 	{
@@ -110,18 +112,12 @@ bool GLBufferImpl::recreate() const
 }
 
 //
-unsigned int GLBufferImpl::getSizeInBytes() const
-{
-	return mSizeInBytes;
-}
-
-//
 void* GLBufferImpl::map()
 {
 	if (mDynamic)
 	{
 		// Orphaning
-		glBindBuffer(mTarget, mBuffer);
+		glBindBuffer(mTarget, mBufferName);
 		glBufferData(mTarget, getSizeInBytes(), nullptr, mBufferAccess);
 	}
 	
@@ -158,7 +154,7 @@ void GLBufferImpl::updateData(const void* data, int start, int dataSize)
         memcpy(&_shadowCopy[start], data, dataSize);
     }
 	
-	glBindBuffer(mTarget, mBuffer);
+	glBindBuffer(mTarget, mBufferName);
 	glBufferSubData(mTarget, start, dataSize, data);
     glBindBuffer(mTarget, 0);
 }
