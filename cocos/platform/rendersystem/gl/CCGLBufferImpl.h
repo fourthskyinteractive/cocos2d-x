@@ -41,7 +41,6 @@ public:
 	// Specific query methods
 	GLuint getBufferName() const { return mBufferName; }
 	GLenum getBufferTarget() const { return mBufferTarget; }
-	virtual unsigned int getSizeInBytes() const override { return mSizeInBytes; }
 	
 	// 
 	virtual bool init(BufferImpl::BufferType type, unsigned int sizeInBytes, bool dynamic = false) override;
@@ -56,15 +55,12 @@ public:
 	virtual void unmap() override;
 	
 	// 
-	virtual void updateData(const void* data, int start, int dataSize) override;
+	virtual bool updateData(const void* data, unsigned int start, unsigned int dataSize) override;
 	
 protected;
 	mutable GLuint mBufferName;
 	mutable GLenum mBufferTarget
 	GLenum mBufferAccess;
-	
-	mutable unsigned int mSizeInBytes;
-	bool mDynamic;
 	
 private:
 	CC_DISALLOW_COPY_AND_ASSIGN(GLBufferImpl);

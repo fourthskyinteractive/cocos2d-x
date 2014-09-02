@@ -32,6 +32,12 @@ THE SOFTWARE.
 
 NS_CC_BEGIN
 
+// Forward declarations
+class Image;
+typedef struct _MipmapInfo MipmapInfo;
+
+
+
 class ResourceImpl : public Ref
 {
 public:
@@ -53,12 +59,12 @@ public:
 	};
 	
 	// Constructor and destructor
-	BufferImpl() : mSizeInBytes(0), _type(Vertex) { }
+	BufferImpl() : mSizeInBytes(0), mType(Vertex), mDynamic(false) { }
 	virtual ~BufferImpl() { }
 	
 	// Query methods
-	TextureType getType() const { return _type; }
-	virtual unsigned int getSizeInBytes() const = 0;
+	TextureType getType() const { return mType; }
+	unsigned int getSizeInBytes() const { return _size; }
 	
 	// Init buffer
 	virtual bool init(BufferImpl::BufferType type, unsigned int sizeInBytes, bool dynamic = false) = 0;
@@ -70,16 +76,22 @@ public:
 	virtual void unmap() = 0;
 	
 	// Update buffer data
-	virtual void updateData(const void* data) { this->updateData(data, 0, getSizeInBytes()); }
+	virtual bool updateData(const void* data) { return this->updateData(data, 0, getSizeInBytes()); }
 	
 	// Update buffer data with specific amount of data
-	virtual void updateData(const void* data, int start, int dataSize) = 0;
+	virtual bool updateData(const void* data, unsigned int start, unsigned int dataSize) = 0;
 	
 protected:
 	static bool _enableShadowCopy;
 	
 	// Buffer type
-	mutable BufferType _type;
+	mutable BufferType mType;
+	
+	// Size of the buffer
+	mutable unsigned int mSizeInBytes;
+	
+	// Is this buffer dynamic modified?
+	bool mDynamic;
 	
 	// Shadow copy for resource contents
 	std::vector<unsigned char> _shadowCopy;
@@ -102,47 +114,72 @@ public:
 	};
 	
 	// Constructor and destructor
-	TextureImpl() : _type(ShaderResource), _pixelFormat(PixelFormat::AUTO) { }
+	TextureImpl() : mType(ShaderResource), mPixelFormat(PixelFormat::AUTO),
+					mWidth(0), mHeight(0), mNumMips(0), mNumSamples(1),
+					mNumSlices(1) { }
 	virtual ~TextureImpl() { }
 	
 	// Query methods
 	TextureType getType() const { return _type; }
 	Texture2D::PixelFormat getPixelFormat() const { return _pixelFormat; }
-	virtual unsigned int getWidthInBytes() const = 0;
-	virtual unsigned int getHeightInBytes() const = 0;
-	virtual unsigned int getDepthInBytes() const = 0;
-	virtual unsigned int getNumMipLevels() const = 0;	
-	virtual unsigned int getNumSamples() const = 0;	
-	virtual unsigned int getNumSlices() const = 0;
+	unsigned int getWidthInBytes() const { return mWidth; }
+	unsigned int getHeightInBytes() const { return mHeight; }
+	unsigned int getNumMipLevels() const { return mNumMips; }
+	unsigned int getNumSamples() const  { return mNumSamples; }
+	unsigned int getNumSlices() const { return mNumSlices; }
 	
 	// Init texture
 	virtual bool init(TextureImpl::TextureType type, 
 					   Texture2D::PixelFormat format,
-					   int width, 
-					   int height, 
-					   int depth = 0, 
-					   int numMipLevels = 0, 
-					   int sampleCount = 1,
-					   int slices = 1) = 0;
+					   unsigned int width, 
+					   unsigned int height, 
+					   MipmapInfo* mipmaps = nullptr,
+					   unsigned int numMipLevels = 1, 
+					   unsigned int sampleCount = 1,
+					   unsigned int slices = 1) = 0;
 	
 	// 
 	virtual void generateMips() = 0;
 	
 	// 
-	virtual void updateData(const void* data) = 0;
+	virtual bool updateData(const void* data)
+	{
+		return this->updateData(data, getWidth(), getHeight());
+	}
 		
 	// 
-	virtual void updateData(const void* data, int start, int dataSize, int mipLevel = 0, int slice = 0) = 0;
+	virtual bool updateData(const void* data, 
+							unsigned int width, 
+							unsigned int height,
+							unsigned int offsetX = 0, 
+							unsigned int offsetY = 0,
+							unsigned int mipLevel = 0, 
+							unsigned int slice = 0) = 0;
 	
 	// 
-	virtual void readData(void* data) = 0;
+	virtual bool readData(const void* data)
+	{
+		return this->readData(data, getWidth(), getHeight());
+	}
 	
 	// 
-	virtual void readData(void* data, int start, int dataSize, int mipLevel = 0, int slice = 0) = 0;
+	virtual bool readData(void* data, 
+						  unsigned int width, 
+						  unsigned int height,
+						  unsigned int offsetX = 0, 
+						  unsigned int offsetY = 0,
+						  unsigned int mipLevel = 0, 
+						  unsigned int slice = 0) = 0;
 	
 protected:
-	mutable TextureType _type;
-	mutable Texture2D::PixelFormat _pixelFormat;
+	mutable TextureType mType;
+	mutable Texture2D::PixelFormat mPixelFormat;
+	
+	mutable unsigned int mWidth;
+	mutable unsigned int mHeight;
+	mutable unsigned int mNumMips;
+	mutable unsigned int mNumSamples;
+	mutable unsigned int mNumSlices;
 	
 };
 
@@ -164,12 +201,15 @@ public:
 						   bool normalize) = 0;
 	
 	// 
-	virtual void build() = 0;
+	virtual void end() = 0;
 };
 
 class ProgramImpl : public Ref
 {
 public:
+	//
+	virtual bool init() = 0;
+
 	// 
 	virtual void build() = 0;
 	

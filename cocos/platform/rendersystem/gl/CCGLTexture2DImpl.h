@@ -38,13 +38,6 @@ public:
 	~GLVertexDeclarationImpl();
 	
 	// Specific query methods
-	virtual unsigned int getWidthInBytes() const override { return mWidth; }
-	virtual unsigned int getHeightInBytes() const override { return mHeight; }
-	virtual unsigned int getDepthInBytes() const override { return mDepth; }
-	virtual unsigned int getNumMipLevels() const override { return mNumMips; }
-	virtual unsigned int getNumSamples() const override { return mNumSamples; }
-	virtual unsigned int getNumSlices() const override { return mNumSlices; }
-	
 	GLuint getTextureName() const { return mTextureName; }
 	GLuint getDepthStencilRenderbufferName const { return mDepthStencilRenderbufferName; }
 	GLuint getFramebufferName() const { return mFramebufferName; }
@@ -52,41 +45,40 @@ public:
 	// Init texture
 	virtual bool init(TextureImpl::TextureType type, 
 					   Texture2D::PixelFormat format,
-					   int width, 
-					   int height, 
-					   int depth = 0, 
-					   int numMipLevels = 0, 
-					   int sampleCount = 1,
-					   int slices = 1) override;
+					   unsigned int width, 
+					   unsigned int height, 
+					   MipmapInfo* mipmaps = nullptr,
+					   unsigned int numMipLevels = 1, 
+					   unsigned int sampleCount = 1,
+					   unsigned int slices = 1) override;
 	
 	// 
 	virtual void generateMips() override;
-	
-	// 
-	virtual void updateData(const void* data) override;
 		
 	// 
-	virtual void updateData(const void* data, int start, int dataSize, int mipLevel = 0, int slice = 0) override;
+	virtual bool updateData(const void* data, 
+							unsigned int width, 
+							unsigned int height,
+							unsigned int offsetX = 0, 
+							unsigned int offsetY = 0,
+							unsigned int mipLevel = 0, 
+							unsigned int slice = 0) override;
 	
 	// 
-	virtual void readData(void* data) override;
-	
-	// 
-	virtual void readData(void* data, int start, int dataSize, int mipLevel = 0, int slice = 0) override;
+	virtual bool readData(void* data, 
+						  unsigned int width, 
+						  unsigned int height,
+						  unsigned int offsetX = 0, 
+						  unsigned int offsetY = 0,
+						  unsigned int mipLevel = 0, 
+						  unsigned int slice = 0) override;
 	
 protected:
-	unsigned int mWidth;
-	unsigned int mHeight;
-	unsigned int mDepth;
-	unsigned int mNumMips;
-	unsigned int mNumSamples;
-	unsigned int mNumSlices;
-	
 	GLuint mTextureName;
 	GLuint mDepthStencilRenderbufferName;
 	GLuint mFramebufferName;
-	GLuint mOldFramebufferName;
 	
+	bool createFramebufferObjects();
 };
 
 NS_CC_END

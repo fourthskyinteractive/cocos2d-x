@@ -39,8 +39,6 @@ GLBufferImpl::GLBufferImpl()
 	, mBufferName(0)
 	, mBufferTarget(0)
 	, mBufferAccess(0)
-	, mSizeInBytes(0)
-	, mDynamic(false)
 {
 	
 }
@@ -58,11 +56,14 @@ bool GLBufferImpl::init(BufferImpl::BufferType type, unsigned int sizeInBytes, b
 {
 	if(0 == sizeInBytes)
         return false;
-		
+	
 	// Record size in bytes
 	mSizeInBytes = sizeInBytes;
 	
-	// Configure target
+	// Set type of buffer...
+	mType = type;
+	
+	// ... and configure target 
 	switch(type)
 	{
 	case Vertex:
@@ -80,7 +81,8 @@ bool GLBufferImpl::init(BufferImpl::BufferType type, unsigned int sizeInBytes, b
 	}
 	
 	// Configure access
-	mBufferAccess = dynamic == true ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+	mDynamic = dynamic;
+	mBufferAccess = mDynamic == true ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 	
 	// Allocate space for shadow copy
 	if(isShadowCopyEnabled())
@@ -132,7 +134,7 @@ void GLBufferImpl::unmap()
 }
 
 // 
-void GLBufferImpl::updateData(const void* data, int start, int dataSize)
+bool GLBufferImpl::updateData(const void* data, unsigned int start, unsigned int dataSize)
 {
 	if(dataSize <= 0 || nullptr == data) 
 		return false;
@@ -157,6 +159,8 @@ void GLBufferImpl::updateData(const void* data, int start, int dataSize)
 	glBindBuffer(mTarget, mBufferName);
 	glBufferSubData(mTarget, start, dataSize, data);
     glBindBuffer(mTarget, 0);
+	
+	return true;
 }
 
 NS_CC_END
