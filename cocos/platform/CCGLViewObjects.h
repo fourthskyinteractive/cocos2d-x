@@ -29,6 +29,7 @@ THE SOFTWARE.
 
 #include "base/ccTypes.h"
 #include <vector>
+#include "renderer/CCTexture2D.h"
 
 NS_CC_BEGIN
 
@@ -59,12 +60,12 @@ public:
 	};
 	
 	// Constructor and destructor
-	BufferImpl() : mSizeInBytes(0), mType(Vertex), mDynamic(false) { }
+	BufferImpl() : mSizeInBytes(0), mType(BufferType::Vertex), mDynamic(false) { }
 	virtual ~BufferImpl() { }
 	
 	// Query methods
-	TextureType getType() const { return mType; }
-	unsigned int getSizeInBytes() const { return _size; }
+	BufferType getType() const { return mType; }
+	unsigned int getSizeInBytes() const { return mSizeInBytes; }
 	
 	// Init buffer
 	virtual bool init(BufferImpl::BufferType type, unsigned int sizeInBytes, bool dynamic = false) = 0;
@@ -114,16 +115,16 @@ public:
 	};
 	
 	// Constructor and destructor
-	TextureImpl() : mType(ShaderResource), mPixelFormat(PixelFormat::AUTO),
+	TextureImpl() : mType(TextureType::ShaderResource), mPixelFormat(Texture2D::PixelFormat::AUTO),
 					mWidth(0), mHeight(0), mNumMips(0), mNumSamples(1),
 					mNumSlices(1) { }
 	virtual ~TextureImpl() { }
 	
 	// Query methods
-	TextureType getType() const { return _type; }
-	Texture2D::PixelFormat getPixelFormat() const { return _pixelFormat; }
-	unsigned int getWidthInBytes() const { return mWidth; }
-	unsigned int getHeightInBytes() const { return mHeight; }
+	TextureType getType() const { return mType; }
+	Texture2D::PixelFormat getPixelFormat() const { return mPixelFormat; }
+	unsigned int getWidth() const { return mWidth; }
+	unsigned int getHeight() const { return mHeight; }
 	unsigned int getNumMipLevels() const { return mNumMips; }
 	unsigned int getNumSamples() const  { return mNumSamples; }
 	unsigned int getNumSlices() const { return mNumSlices; }
@@ -157,7 +158,7 @@ public:
 							unsigned int slice = 0) = 0;
 	
 	// 
-	virtual bool readData(const void* data)
+	virtual bool readData(void* data)
 	{
 		return this->readData(data, getWidth(), getHeight());
 	}
@@ -180,10 +181,11 @@ protected:
 	mutable unsigned int mNumMips;
 	mutable unsigned int mNumSamples;
 	mutable unsigned int mNumSlices;
+	bool mAntialiasEnabled;
 	
 };
 
-class VertexDeclarationImpl : public Ref
+class VertexDeclarationImpl : public ResourceImpl
 {
 public:
 	// 
@@ -207,22 +209,41 @@ public:
 class ProgramImpl : public Ref
 {
 public:
-	//
-	virtual bool init() = 0;
+	// Info about uniforms will be available with tuples
+	typedef std::tuple</*location*/unsigned int, 
+					   /*name*/std::string, 
+					   /*element type*/ElementType, 
+					   /*num elements*/unsigned int, 
+					   /*array size*/unsigned int> UniformInfo;
+	typedef std::vector<UniformInfo> UniformInfoList;
 
-	// 
-	virtual void build() = 0;
+	// Query methods
+	const UniformInfoList& getLocationInfo() const { return mLocationInfo; }
+	unsigned int getNumLocations() const { return mLocationInfo.size(); }
 	
-	// Get location of the constant. 
-	// If OpenGL, is the location within OpenGL program.
-	// In other render systems, is the position in buffer pointer
-	virtual unsigned int getLocationForName(const char* constantName) const = 0;
+	// Initialize program with shader code
+	virtual bool init(const std::string& vertexShaderName, const std::string& fragmentShaderName) = 0;
 	
-	// Set uniform using constant name
-	virtual unsigned int setUniformData(const char* constantName, const void* pData, unsigned int dataSize) = 0;
+	// Methods to set uniform values
+	virtual void setFloatUniform(unsigned int location, float f1) = 0;
+	virtual void setFloatUniform(unsigned int location, float f1, float f2) = 0;
+	virtual void setFloatUniform(unsigned int location, float f1, float f2, float f3) = 0;
+	virtual void setFloatUniform(unsigned int location, float f1, float f2, float f3, float f4) = 0;
+	virtual void setIntegerUniform(unsigned int location, int i1) = 0;
+	virtual void setIntegerUniform(unsigned int location, int i1, int i2) = 0;
+	virtual void setIntegerUniform(unsigned int location, int i1, int i2, int i3) = 0;
+	virtual void setIntegerUniform(unsigned int location, int i1, int i2, int i3, int i4) = 0;
+	virtual void setIntegerUniformArray(unsigned int location, const int* ints, int numElements, int numArrays = 1) = 0;
+	virtual void setFloatUniformArray(unsigned int location, const float* floats, int numElements, int numArrays = 1) = 0;
+								 
+protected:
+	mutable UniformInfoList mLocationInfo;
 	
-	// Set uniform using location position
-	virtual unsigned int setUniformData(unsigned int location, const void* pData, unsigned int dataSize) = 0;
+	// Parse the input vertex structure
+	virtual void parseVertexStructure() = 0;
+    
+	// Parse the uniforms for shaders
+	virtual void parseUniforms() = 0;
 };
 
 NS_CC_END

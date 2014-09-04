@@ -33,8 +33,14 @@ THE SOFTWARE.
 #include "base/CCIMEDispatcher.h"
 #include "base/ccUtils.h"
 #include "base/ccUTF8.h"
+#include "base/CCConfiguration.h"
 
 #include <unordered_map>
+
+#include "platform/rendersystem/gl/CCGLBufferImpl.h"
+#include "platform/rendersystem/gl/CCGLTexture2DImpl.h"
+#include "platform/rendersystem/gl/CCGLVertexDeclarationImpl.h"
+#include "platform/rendersystem/gl/CCGLProgramImpl.h"
 
 NS_CC_BEGIN
 
@@ -760,13 +766,12 @@ TextureImpl* GLViewImpl::createTexture(TextureImpl::TextureType type,
 									   Texture2D::PixelFormat format,
 									   int width, 
 									   int height, 
-									   int depth, 
 									   int numMipLevels, 
 									   int slices, 
 									   int sampleCount)
 {
 	auto tex = new (std::nothrow) GLTexture2DImpl();
-	if (tex && tex->init(type, format, width, height, depth, numMipLevels, slices, sampleCount))
+	if (tex && tex->init(type, format, width, height, nullptr, numMipLevels, slices, sampleCount))
 	{
 		tex->autorelease();
 		return tex;
@@ -808,12 +813,12 @@ ProgramImpl* GLViewImpl::createProgram(const char* vertexShader, const char* fra
 	return nullptr;	
 }
 
-void GLViewImpl::draw(int primitiveType, int vertexStart, int vertexCount)
+void GLViewImpl::draw(PrimitiveType primitiveType, int vertexStart, int vertexCount)
 {
 	
 }
 
-void GLViewImpl::drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount)
+void GLViewImpl::drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount)
 {
 	
 }

@@ -73,7 +73,7 @@ public:
     virtual void setViewPortInPoints(float x , float y , float w , float h) override;
     virtual void setScissorInPoints(float x , float y , float w , float h) override;
 	virtual bool isScissorEnabled() override;
-    virtual Rect getScissorRect() override;
+    virtual Rect getScissorRect() const override;
 
     bool windowShouldClose();
     void pollEvents();
@@ -159,7 +159,6 @@ protected:
 									   Texture2D::PixelFormat format,
 									   int width, 
 									   int height, 
-									   int depth = 0, 
 									   int numMipLevels = 0, 
 									   int slices = 1, 
 									   int sampleCount = 1) override;
@@ -168,9 +167,9 @@ protected:
 	
 	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader) override;
 	
-	virtual void draw(int primitiveType, int vertexStart, int vertexCount) override;
+	virtual void draw(PrimitiveType primitiveType, int vertexStart, int vertexCount) override;
 	
-	virtual void drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) override;
+	virtual void drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) override;
 
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(GLViewImpl);

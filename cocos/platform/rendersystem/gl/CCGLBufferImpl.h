@@ -27,7 +27,8 @@ THE SOFTWARE.
 #ifndef __CC_EGLBufferIMPL_H__
 #define __CC_EGLBufferIMPL_H__
 
-#include "CCGLViewObjects.h"
+#include "platform/CCGLViewObjects.h"
+#include "CCGL.h"
 
 NS_CC_BEGIN
 
@@ -57,9 +58,9 @@ public:
 	// 
 	virtual bool updateData(const void* data, unsigned int start, unsigned int dataSize) override;
 	
-protected;
+protected:
 	mutable GLuint mBufferName;
-	mutable GLenum mBufferTarget
+	mutable GLenum mBufferTarget;
 	GLenum mBufferAccess;
 	
 private:

@@ -55,6 +55,12 @@
     <Filter Include="storage">
       <UniqueIdentifier>{44bdf58f-4af2-433c-b4af-58dc05ef96b5}</UniqueIdentifier>
     </Filter>
+	<Filter Include="platform\rendersystem">
+      <UniqueIdentifier>{f3352c7a-d868-495a-859a-cc09b6e4dea8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="platform\rendersystem\gl">
+      <UniqueIdentifier>{8ed51233-275d-488a-910d-1a2b3ac79351}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\physics\CCPhysicsBody.cpp">
@@ -498,6 +504,18 @@
     </ClCompile>
     <ClCompile Include="..\platform\win32\CCStdC.cpp">
       <Filter>platform\win32</Filter>
+    </ClCompile>
+	<ClCompile Include="..\platform\rendersystem\gl\CCGLBufferImpl.cpp">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClCompile>
+	<ClCompile Include="..\platform\rendersystem\gl\CCGLTexture2DImpl.cpp">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClCompile>
+	<ClCompile Include="..\platform\rendersystem\gl\CCGLVertexDeclarationImpl.cpp">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClCompile>
+	<ClCompile Include="..\platform\rendersystem\gl\CCGLProgramImpl.cpp">
+      <Filter>platform\rendersystem\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\math\CCAffineTransform.cpp">
       <Filter>math</Filter>
@@ -1096,6 +1114,18 @@
     <ClInclude Include="..\platform\win32\CCStdC.h">
       <Filter>platform\win32</Filter>
     </ClInclude>
+	<ClInclude Include="..\platform\rendersystem\gl\CCGLBufferImpl.h">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClInclude>
+	<ClInclude Include="..\platform\rendersystem\gl\CCGLTexture2DImpl.h">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClInclude>
+	<ClInclude Include="..\platform\rendersystem\gl\CCGLVertexDeclarationImpl.h">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClInclude>
+	<ClInclude Include="..\platform\rendersystem\gl\CCGLProgramImpl.h">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClInclude>	
     <ClInclude Include="..\math\CCAffineTransform.h">
       <Filter>math</Filter>
     </ClInclude>
@@ -1190,6 +1220,9 @@
       <Filter>platform\desktop</Filter>
     </ClInclude>
     <ClInclude Include="..\platform\CCGLView.h">
+      <Filter>platform</Filter>
+    </ClInclude>
+	<ClInclude Include="..\platform\CCGLViewObjects.h">
       <Filter>platform</Filter>
     </ClInclude>
     <ClInclude Include="CCProtectedNode.h">

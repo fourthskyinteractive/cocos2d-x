@@ -25,6 +25,12 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "platform/rendersystem/gl/CCGLTexture2DImpl.h"
+#include "base/CCPlatformMacros.h"
+#include "base/ccUtils.h"
+#include "base/ccMacros.h"
+#include "base/CCConfiguration.h"
+#include "base/CCDirector.h"
+#include "platform/CCImage.h"	// for Image and MipmapInfo
 
 NS_CC_BEGIN
 
@@ -105,8 +111,18 @@ namespace {
     };
 }
 
+//CLASS IMPLEMENTATIONS:
+
+//The PixpelFormat corresponding information
+const PixelFormatInfoMap _pixelFormatInfoTables(TexturePixelFormatInfoTablesValue,
+	TexturePixelFormatInfoTablesValue + sizeof(TexturePixelFormatInfoTablesValue) / sizeof(TexturePixelFormatInfoTablesValue[0]));
+
+// If the image has alpha, you can create RGBA8 (32-bit) or RGBA4 (16-bit) or RGB5A1 (16-bit)
+// Default is: RGBA8888 (32-bit textures)
+static Texture2D::PixelFormat g_defaultAlphaPixelFormat = Texture2D::PixelFormat::DEFAULT;
+
 GLTexture2DImpl::GLTexture2DImpl()
-	: Texture2DImpl()
+	: TextureImpl()
 	, mTextureName(0)
 	, mDepthStencilRenderbufferName(0)
 	, mFramebufferName(0)
@@ -129,12 +145,21 @@ GLTexture2DImpl::~GLTexture2DImpl()
 	}
 }
 
-bool GLTexture2DImpl::init(TextureImpl::TextureType type, 
-						   Texture2D::PixelFormat format,
-						   int width, int height, 
-						   MipmapInfo* mipmaps,
-						   int numMipLevels, 
-						   int sampleCount, int slices)
+bool GLTexture2DImpl::recreate()
+{
+	// TODO implement
+
+	return false;
+}
+
+bool GLTexture2DImpl::init(TextureImpl::TextureType type,
+							Texture2D::PixelFormat format,
+							unsigned int width,
+							unsigned int height,
+							MipmapInfo* mipmaps,
+							unsigned int numMipLevels,
+							unsigned int sampleCount,
+							unsigned int slices)
 {
 	mType = type;
 	mPixelFormat = format;
@@ -163,9 +188,9 @@ bool GLTexture2DImpl::init(TextureImpl::TextureType type,
     }
 	
 	//Set the row align only when mipmapsNum == 1 and the data is uncompressed
-    if (mipmapsNum == 1 && !info.compressed)
+    if (mNumMips == 1 && !info.compressed)
     {
-        unsigned int bytesPerRow = pixelsWide * info.bpp / 8;
+        unsigned int bytesPerRow = mWidth * info.bpp / 8;
 
         if(bytesPerRow % 8 == 0)
         {
@@ -195,66 +220,71 @@ bool GLTexture2DImpl::init(TextureImpl::TextureType type,
 		mTextureName = 0;
 	}
 	glGenTextures(1, &mTextureName);
-	glBindTexture2D(mTextureName);
+	glBindTexture(GL_TEXTURE_2D, mTextureName);
 	
-	if (mipmapsNum == 1)
+	if (mNumMips == 1)
     {
         glTexParameteri(GL_TEXTURE_2D, 
 						GL_TEXTURE_MIN_FILTER, 
-						_antialiasEnabled ? GL_LINEAR : GL_NEAREST);
+						mAntialiasEnabled ? GL_LINEAR : GL_NEAREST);
     }
 	else
     {
         glTexParameteri(GL_TEXTURE_2D, 
 						GL_TEXTURE_MIN_FILTER, 
-						_antialiasEnabled ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_NEAREST);
+						mAntialiasEnabled ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_NEAREST);
     }
 	
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _antialiasEnabled ? GL_LINEAR : GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mAntialiasEnabled ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	
 	CHECK_GL_ERROR_DEBUG(); // clean possible GL error
 	
-	// If mipmaps array is null, create a zeroed array
+	// If mipmaps array is null, probably this is a render target texture,
+	// so create a zeroed array and configure texture size
 	void *data = nullptr;
-	if (mipmaps == nullptr)
+	if (mipmaps == nullptr /* && mType == TextureType::RenderTarget*/)
 	{
-		// textures must be power of two squared
-        int powW = 0;
-        int powH = 0;
+		// render target textures must be power-of-two squared
+		int powW = (int)(mWidth * CC_CONTENT_SCALE_FACTOR());
+		int powH = (int)(mHeight * CC_CONTENT_SCALE_FACTOR());
 
-        if (Configuration::getInstance()->supportsNPOT())
+        if (!Configuration::getInstance()->supportsNPOT())
         {
-            powW = w;
-            powH = h;
+			powW = ccNextPOT(powW);
+			powH = ccNextPOT(powW);
         }
-        else
-        {
-            powW = ccNextPOT(w);
-            powH = ccNextPOT(h);
-        }
+
+		mWidth = powW;
+		mHeight = powH;
 		
-		auto dataLen = powW * powH * 4;
+		// Create a empty mipmap data
+		auto dataLen = mWidth * mHeight * 4;
 		data = malloc(dataLen);
+		if (data == nullptr)
+		{
+			return false;
+		}
+
 		memset(data, 0, dataLen);
 		
 		MipmapInfo mipmap;
-		mipmap.address = data;
+		mipmap.address = static_cast<unsigned char*>(data);
 		mipmap.len = dataLen;
-		
-		CC_BREAK_IF(mipmap.address == 0);
 		
 		mipmaps == &mipmap;
 	}
 	
 	// Load texture data
+	width = mWidth;
+	height = mHeight;
 	for (int i = 0; i < mNumMips; ++i)
 	{
 		unsigned char *data = mipmaps[i].address;
 		GLsizei datalen = mipmaps[i].len;
 
-		if (info.compressed)
+		if (info.compressed == true)
 		{
 			glCompressedTexImage2D(GL_TEXTURE_2D, 
 									i, 
@@ -299,7 +329,7 @@ bool GLTexture2DImpl::init(TextureImpl::TextureType type,
 	// If texture type is render-target, create framebuffer and other objects
 	if (mType == TextureType::RenderTarget)
 	{
-		return createFramebufferObjects();
+		return createFramebufferObjects(GL_DEPTH24_STENCIL8);
 	}
 	
 	return true;
@@ -308,9 +338,9 @@ bool GLTexture2DImpl::init(TextureImpl::TextureType type,
 
 void GLTexture2DImpl::generateMips()
 {
-	glBindTexture2D(mTextureName);
+	glBindTexture(GL_TEXTURE_2D, mTextureName);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture2D(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 bool GLTexture2DImpl::updateData(const void* data, 
@@ -324,7 +354,7 @@ bool GLTexture2DImpl::updateData(const void* data,
 	// Pick pixel format
 	const PixelFormatInfo& info = _pixelFormatInfoTables.at(mPixelFormat);
 	
-	glBindTexture2D(mTextureName);
+	glBindTexture(GL_TEXTURE_2D, mTextureName);
 	glTexSubImage2D(GL_TEXTURE_2D,	
 					mipLevel, 
 					offsetX, 
@@ -346,15 +376,18 @@ bool GLTexture2DImpl::readData(void* data,
 								unsigned int mipLevel, 
 								unsigned int slice)
 {
+	// Pick pixel format
+	const PixelFormatInfo& info = _pixelFormatInfoTables.at(mPixelFormat);
 	
+	// TODO implement read data
 	
-	return true;
+	return false;
 }
 
-bool GLTexture2DImpl::createFramebufferObjects()
+bool GLTexture2DImpl::createFramebufferObjects(GLint depthStencilFormat)
 {
 	// Store old framebuffer binding
-	GLuint oldFramebufferName = 0;
+	GLint oldFramebufferName = 0;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFramebufferName);
 	
 	// Store old renderbuffer binding
@@ -370,13 +403,12 @@ bool GLTexture2DImpl::createFramebufferObjects()
 	
 	// Force depth stencil format
 	// TODO Check if formats have any issue with any platform
-	GLuint depthStencilFormat = GL_DEPTH24_STENCIL8;
 	if (depthStencilFormat != 0)
 	{
 		//create and attach depth buffer
 		glGenRenderbuffers(1, &mDepthStencilRenderbufferName);
 		glBindRenderbuffer(GL_RENDERBUFFER, mDepthStencilRenderbufferName);
-		glRenderbufferStorage(GL_RENDERBUFFER, depthStencilFormat, (GLsizei)powW, (GLsizei)powH);
+		glRenderbufferStorage(GL_RENDERBUFFER, depthStencilFormat, (GLsizei)mWidth, (GLsizei)mHeight);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthStencilRenderbufferName);
 
 		// if depth format is the one with stencil part, bind same render buffer as stencil attachment

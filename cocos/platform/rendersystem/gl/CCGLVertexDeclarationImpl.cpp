@@ -25,6 +25,9 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "platform/rendersystem/gl/CCGLVertexDeclarationImpl.h"
+#include "platform/rendersystem/gl/CCGLBufferImpl.h"
+
+NS_CC_BEGIN
 
 GLVertexDeclarationImpl::GLVertexDeclarationImpl()
 	: VertexDeclarationImpl()
@@ -35,7 +38,7 @@ GLVertexDeclarationImpl::GLVertexDeclarationImpl()
 
 GLVertexDeclarationImpl::~GLVertexDeclarationImpl()
 {
-	
+	// TODO implement
 }
 
 bool GLVertexDeclarationImpl::init()
@@ -45,13 +48,14 @@ bool GLVertexDeclarationImpl::init()
 
 bool GLVertexDeclarationImpl::recreate()
 {
-	
+	// TODO implement
 }
 
-void GLVertexDeclarationImpl::begin() override
+void GLVertexDeclarationImpl::begin()
 {
 	mStreamIndex = 0;
 	
+	// TODO implement
 }
 
 bool GLVertexDeclarationImpl::setStream(BufferImpl* buffer, 
@@ -59,15 +63,16 @@ bool GLVertexDeclarationImpl::setStream(BufferImpl* buffer,
 									    int semantic, 
 									    ElementType type, 
 									    int stride, 
-									    bool normalize) override
+									    bool normalize)
 {
-	
+	// TODO implement
+
 	return false;
 }
 
-void GLVertexDeclarationImpl::build() override
+void GLVertexDeclarationImpl::end()
 {
-	
+	// TODO implement
 }
 
 /**************************************************************/
@@ -95,57 +100,71 @@ bool GLVertexDeclarationVAOImpl::init()
 
 bool GLVertexDeclarationVAOImpl::recreate()
 {
+	if (mVertexArrayObject != 0)
+	{
+		glDeleteVertexArrays(1, &mVertexArrayObject);
+		mVertexArrayObject = 0;
+	}
+
 	glGenVertexArrays(1, &mVertexArrayObject);
+
+	return true;
 }
 
-void GLVertexDeclarationVAOImpl::begin() override
+void GLVertexDeclarationVAOImpl::begin()
 {
 	mStreamIndex = 0;
 
-	// 
+	// Bind vertex array
 	glBindVertexArray(mVertexArrayObject);
 }
 
 bool GLVertexDeclarationVAOImpl::setStream(BufferImpl* buffer, 
-					   int offset, 
-					   int semantic, 
-					   ElementType type, 
-					   int stride, 
-					   bool normalize) override
+										   int offset, 
+										   int semantic, 
+										   ElementType type, 
+										   int stride, 
+										   bool normalize)
 {
 	// Define buffer for this stream
-	glBindBuffer(buffer->getTarget(), buffer->getBufferName());
+	if (buffer == nullptr)
+	{
+		return false;
+	}
+
+	GLBufferImpl* glBuffer = static_cast<GLBufferImpl*>(buffer);
+	glBindBuffer(glBuffer->getBufferTarget(), glBuffer->getBufferName());
 	
 	// Define vertex attrib pointer
 	GLint glSize = 4;
 	GLenum glType = GL_FLOAT;
 	switch (type)
 	{
-	case Byte:
+	case ElementType::Byte:
 		glSize = 1;
 		glType = GL_BYTE;
 		break;
-	case UnsignedByte:
+	case ElementType::UnsignedByte:
 		glSize = 1;
 		glType = GL_UNSIGNED_BYTE;
 		break;
-	case Short:
+	case ElementType::Short:
 		glSize = 2;
 		glType = GL_BYTE;
 		break;
-	case UnsignedShort:
+	case ElementType::UnsignedShort:
 		glSize = 2;
 		glType = GL_UNSIGNED_SHORT;
 		break;
-	case Integer:
+	case ElementType::Integer:
 		glSize = 4;
 		glType = GL_BYTE;
 		break;
-	case UnsignedInteger:
+	case ElementType::UnsignedInteger:
 		glSize = 4;
 		glType = GL_UNSIGNED_INT;
 		break;
-	case Float:
+	case ElementType::Float:
 		glSize = 4;
 		glType = GL_FLOAT;
 		break;
@@ -161,8 +180,10 @@ bool GLVertexDeclarationVAOImpl::setStream(BufferImpl* buffer,
 	mStreamIndex++;
 }
 
-void GLVertexDeclarationVAOImpl::build() override
+void GLVertexDeclarationVAOImpl::end()
 {
 	// Just unbind vertex array, configuration is already copyed
 	glBindVertexArray(0);
 }
+
+NS_CC_END

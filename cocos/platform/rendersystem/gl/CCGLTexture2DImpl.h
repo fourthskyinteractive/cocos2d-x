@@ -27,20 +27,24 @@ THE SOFTWARE.
 #ifndef __CC_EGLTexture2DIMPL_H__
 #define __CC_EGLTexture2DIMPL_H__
 
-#include "CCGLViewObjects.h"
+#include "platform/CCGLViewObjects.h"
+#include "CCGL.h"
 
 NS_CC_BEGIN
 
-class GLTexture2DImpl : public Texture2DImpl
+class GLTexture2DImpl : public TextureImpl
 {
 public:
-	GLVertexDeclarationImpl();
-	~GLVertexDeclarationImpl();
+	GLTexture2DImpl();
+	~GLTexture2DImpl();
 	
 	// Specific query methods
 	GLuint getTextureName() const { return mTextureName; }
-	GLuint getDepthStencilRenderbufferName const { return mDepthStencilRenderbufferName; }
+	GLuint getDepthStencilRenderbufferName() const { return mDepthStencilRenderbufferName; }
 	GLuint getFramebufferName() const { return mFramebufferName; }
+
+	// 
+	virtual bool recreate() override;
 	
 	// Init texture
 	virtual bool init(TextureImpl::TextureType type, 
@@ -78,7 +82,7 @@ protected:
 	GLuint mDepthStencilRenderbufferName;
 	GLuint mFramebufferName;
 	
-	bool createFramebufferObjects();
+	bool createFramebufferObjects(GLint depthStencilFormat);
 };
 
 NS_CC_END

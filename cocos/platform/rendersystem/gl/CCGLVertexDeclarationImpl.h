@@ -27,10 +27,12 @@ THE SOFTWARE.
 #ifndef __CC_EGLVertexDeclarationIMPL_H__
 #define __CC_EGLVertexDeclarationIMPL_H__
 
-#include "CCGLViewObjects.h"
-#include "platform/rendersystem/gl/CCGLBufferImpl.h"
+#include "platform/CCGLViewObjects.h"
+#include "CCGL.h"
 
 NS_CC_BEGIN
+
+// Forward declarations
 
 class GLVertexDeclarationImpl : public VertexDeclarationImpl
 {
@@ -54,7 +56,7 @@ public:
 						   int stride, 
 						   bool normalize = false) override;
 	
-	virtual void build() override;
+	virtual void end() override;
 	
 protected:
 	unsigned int mStreamIndex;
@@ -77,15 +79,15 @@ public:
 	virtual bool recreate() override;
 
 	virtual void begin() override;
- 
-	virtual bool setStream(BufferImpl* buffer, 
-						   int offset, 
-						   int semantic, 
-						   ElementType type, 
-						   int stride, 
-						   bool normalize = false) override;
-	
-	virtual void build() override;
+
+	virtual bool setStream(BufferImpl* buffer,
+							int offset,
+							int semantic,
+							ElementType type,
+							int stride,
+							bool normalize = false) override;
+
+	virtual void end() override;
 	
 protected:
 	mutable GLuint mVertexArrayObject;

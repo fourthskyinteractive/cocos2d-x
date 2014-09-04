@@ -66,17 +66,22 @@ bool GLBufferImpl::init(BufferImpl::BufferType type, unsigned int sizeInBytes, b
 	// ... and configure target 
 	switch(type)
 	{
-	case Vertex:
+	case BufferType::Vertex:
 		mBufferTarget = GL_ARRAY_BUFFER;
 		break;
-	case Index:
+	case BufferType::Index_16bits:
+	case BufferType::Index_32bits:
 		mBufferTarget = GL_ELEMENT_ARRAY_BUFFER;
 		break;
-	case Constant:
+	case BufferType::Constant:
 		mBufferTarget = GL_UNIFORM_BUFFER_EXT;
 		break;
-	case ShaderResource:
+	/*
+	case BufferType::ShaderResource:
 		mBufferTarget = GL_SHADER_STORAGE_BUFFER;
+		break;
+	*/
+	default:
 		break;
 	}
 	
@@ -95,20 +100,20 @@ bool GLBufferImpl::init(BufferImpl::BufferType type, unsigned int sizeInBytes, b
 }
 
 //
-bool GLBufferImpl::recreate() const
+bool GLBufferImpl::recreate()
 {
 	glGenBuffers(1, &mBufferName);
-	glBindBuffer(mTarget, mBufferName);
+	glBindBuffer(mBufferTarget, mBufferName);
 	
 	if (GLBufferImpl::_enableShadowCopy == true && _shadowCopy.size() > 0)
 	{
-		glBufferData(mTarget, getSizeInBytes(), &_shadowCopy[0], mBufferAccess);
+		glBufferData(mBufferTarget, getSizeInBytes(), &_shadowCopy[0], mBufferAccess);
 	}
 	else
 	{
-		glBufferData(mTarget, getSizeInBytes(), nullptr, mBufferAccess);
+		glBufferData(mBufferTarget, getSizeInBytes(), nullptr, mBufferAccess);
 	}
-    glBindBuffer(mTarget, 0);
+	glBindBuffer(mBufferTarget, 0);
 	
 	return true;
 }
@@ -119,18 +124,18 @@ void* GLBufferImpl::map()
 	if (mDynamic)
 	{
 		// Orphaning
-		glBindBuffer(mTarget, mBufferName);
-		glBufferData(mTarget, getSizeInBytes(), nullptr, mBufferAccess);
+		glBindBuffer(mBufferTarget, mBufferName);
+		glBufferData(mBufferTarget, getSizeInBytes(), nullptr, mBufferAccess);
 	}
 	
-	return glMapBuffer(mTarget, GL_WRITE_ONLY);
+	return glMapBuffer(mBufferTarget, GL_WRITE_ONLY);
 }
 
 // 
 void GLBufferImpl::unmap()
 {
-	glUnmapBuffer(mTarget);
-	glBindBuffer(mTarget, 0);
+	glUnmapBuffer(mBufferTarget);
+	glBindBuffer(mBufferTarget, 0);
 }
 
 // 
@@ -142,7 +147,7 @@ bool GLBufferImpl::updateData(const void* data, unsigned int start, unsigned int
     if(start < 0)
     {
         CCLOGERROR("Update vertices with begin = %d, will set begin to 0", start);
-        begin = 0;
+        start = 0;
     }
     
     if(start + dataSize > getSizeInBytes())
@@ -156,9 +161,9 @@ bool GLBufferImpl::updateData(const void* data, unsigned int start, unsigned int
         memcpy(&_shadowCopy[start], data, dataSize);
     }
 	
-	glBindBuffer(mTarget, mBufferName);
-	glBufferSubData(mTarget, start, dataSize, data);
-    glBindBuffer(mTarget, 0);
+	glBindBuffer(mBufferTarget, mBufferName);
+	glBufferSubData(mBufferTarget, start, dataSize, data);
+	glBindBuffer(mBufferTarget, 0);
 	
 	return true;
 }

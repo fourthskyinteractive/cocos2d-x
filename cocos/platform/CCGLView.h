@@ -251,14 +251,12 @@ protected:
 	/**
 	 *	View dependant objects builders
 	 */
-	virtual BufferImpl* createBuffer(BufferImpl::BufferType type, 
-									 int sizeInBytes) = 0;
+	virtual BufferImpl* createBuffer(BufferImpl::BufferType type, int sizeInBytes, bool dynamic = false) = 0;
 	
 	virtual TextureImpl* createTexture(TextureImpl::TextureType type, 
 									   Texture2D::PixelFormat format,
 									   int width, 
 									   int height, 
-									   int depth = 0, 
 									   int numMipLevels = 0, 
 									   int slices = 1, 
 									   int sampleCount = 1) = 0;
@@ -267,9 +265,9 @@ protected:
 	
 	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader) = 0;
 	
-	virtual void draw(int primitiveType, int vertexStart, int vertexCount) = 0;
+	virtual void draw(PrimitiveType primitiveType, int vertexStart, int vertexCount) = 0;
 	
-	virtual void drawIndexed(int primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) = 0;
+	virtual void drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) = 0;
 	
 	/**
 	 *	Make friend the classes that will use the internal implementations
