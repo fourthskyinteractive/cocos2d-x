@@ -553,12 +553,12 @@ void GLViewImpl::setScissorInPoints(float x , float y , float w , float h)
                (GLsizei)(h * _scaleY * _retinaFactor * _frameZoomFactor));
 }
 
-bool GLView::isScissorEnabled()
+bool GLViewImpl::isScissorEnabled()
 {
 	return (GL_FALSE == glIsEnabled(GL_SCISSOR_TEST)) ? false : true;
 }
 
-Rect GLView::getScissorRect() const
+Rect GLViewImpl::getScissorRect() const
 {
 	GLfloat params[4];
 	glGetFloatv(GL_SCISSOR_BOX, params);

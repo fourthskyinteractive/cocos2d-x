@@ -23,6 +23,8 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+ #define INITGUID 1
+ 
 #include "CCController.h"
 #include "base/CCPlatformConfig.h"
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
