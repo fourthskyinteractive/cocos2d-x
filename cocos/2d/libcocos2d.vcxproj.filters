@@ -505,6 +505,9 @@
     <ClCompile Include="..\platform\win32\CCStdC.cpp">
       <Filter>platform\win32</Filter>
     </ClCompile>
+	<ClCompile Include="..\platform\rendersystem\gl\CCGLRenderSystem.cpp">
+      <Filter>platform\rendersystem\gl</Filter>
+    </ClCompile>
 	<ClCompile Include="..\platform\rendersystem\gl\CCGLBufferImpl.cpp">
       <Filter>platform\rendersystem\gl</Filter>
     </ClCompile>
@@ -1113,6 +1116,9 @@
     </ClInclude>
     <ClInclude Include="..\platform\win32\CCStdC.h">
       <Filter>platform\win32</Filter>
+    </ClInclude>
+	<ClInclude Include="..\platform\rendersystem\gl\CCGLRenderSystem.h">
+      <Filter>platform\rendersystem\gl</Filter>
     </ClInclude>
 	<ClInclude Include="..\platform\rendersystem\gl\CCGLBufferImpl.h">
       <Filter>platform\rendersystem\gl</Filter>

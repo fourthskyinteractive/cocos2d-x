@@ -53,6 +53,10 @@ THE SOFTWARE.
 
 NS_CC_BEGIN
 
+// Forward declarations
+class GLVertexDeclarationImpl;
+
+
 class CC_DLL GLViewImpl : public GLView
 {
 public:
@@ -61,6 +65,7 @@ public:
     static GLViewImpl* createWithFullScreen(const std::string& viewName);
     static GLViewImpl* createWithFullScreen(const std::string& viewName, const GLFWvidmode &videoMode, GLFWmonitor *monitor);
 
+	static void parseDataType(ElementDataType type, GLint& glSize, GLenum& glType);
     /*
      *frameZoomFactor for frame. This method is for debugging big resolution (e.g.new ipad) app on desktop.
      */
@@ -153,6 +158,10 @@ protected:
 	/**
 	 *	View dependant objects builders
 	 */
+	// Store vertex declaration
+	GLVertexDeclarationImpl* _vertexDeclaration;
+
+
 	virtual BufferImpl* createBuffer(BufferImpl::BufferType type, int sizeInBytes, bool dynamic = false) override;
 	
 	virtual TextureImpl* createTexture(TextureImpl::TextureType type, 
@@ -166,10 +175,16 @@ protected:
 	virtual VertexDeclarationImpl* createVertexDeclaration() override;
 	
 	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader) override;
+
+	virtual void setTexture(TextureImpl* tex, int slot) override;
+
+	virtual void setProgram(ProgramImpl* prog) override;
+
+	virtual void setVertexDeclaration(VertexDeclarationImpl* decl) override;
 	
-	virtual void draw(PrimitiveType primitiveType, int vertexStart, int vertexCount) override;
+	virtual void draw(PrimitiveTopology topology, int vertexStart, int vertexCount) override;
 	
-	virtual void drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) override;
+	virtual void drawIndexed(PrimitiveTopology topology, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexStart, int indexCount) override;
 
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(GLViewImpl);

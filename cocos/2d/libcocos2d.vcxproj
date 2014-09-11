@@ -271,6 +271,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClCompile Include="..\platform\win32\CCDevice.cpp" />
     <ClCompile Include="..\platform\win32\CCFileUtilsWin32.cpp" />
     <ClCompile Include="..\platform\win32\CCStdC.cpp" />
+	<ClInclude Include="..\platform\rendersystem\gl\CCGLRenderSystem.cpp" />
 	<ClCompile Include="..\platform\rendersystem\gl\CCGLBufferImpl.cpp" />
 	<ClCompile Include="..\platform\rendersystem\gl\CCGLTexture2DImpl.cpp" />
 	<ClCompile Include="..\platform\rendersystem\gl\CCGLVertexDeclarationImpl.cpp" />
@@ -482,6 +483,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClInclude Include="..\platform\win32\CCPlatformDefine.h" />
     <ClInclude Include="..\platform\win32\CCStdC.h" />
     <ClInclude Include="..\platform\win32\compat\stdint.h" />
+	<ClInclude Include="..\platform\rendersystem\gl\CCGLRenderSystem.h" />
 	<ClInclude Include="..\platform\rendersystem\gl\CCGLBufferImpl.h" />
 	<ClInclude Include="..\platform\rendersystem\gl\CCGLTexture2DImpl.h" />
 	<ClInclude Include="..\platform\rendersystem\gl\CCGLVertexDeclarationImpl.h" />

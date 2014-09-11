@@ -70,6 +70,7 @@ protected:
 	
 	// Specific methods for this implementation
 	bool compileShader(GLuint* shader, GLenum type, const GLchar* source);
+	void bindPredefinedVertexAttribs();
 	bool link();
 };
 

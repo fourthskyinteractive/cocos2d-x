@@ -26,19 +26,26 @@ THE SOFTWARE.
 
 #include "platform/rendersystem/gl/CCGLVertexDeclarationImpl.h"
 #include "platform/rendersystem/gl/CCGLBufferImpl.h"
+#include "platform/desktop/CCGLViewImpl.h"
+#include "platform/rendersystem/gl/CCGLRenderSystem.h"
 
 NS_CC_BEGIN
 
 GLVertexDeclarationImpl::GLVertexDeclarationImpl()
 	: VertexDeclarationImpl()
-	, mStreamIndex(0)
 {
 	
 }
 
 GLVertexDeclarationImpl::~GLVertexDeclarationImpl()
 {
-	// TODO implement
+	// Release buffers
+	for (auto el : mElementList)
+	{
+		el.buffer->release();
+	}
+
+	mElementList.clear();
 }
 
 bool GLVertexDeclarationImpl::init()
@@ -48,38 +55,89 @@ bool GLVertexDeclarationImpl::init()
 
 bool GLVertexDeclarationImpl::recreate()
 {
-	// TODO implement
+	return true;
 }
 
 void GLVertexDeclarationImpl::begin()
 {
-	mStreamIndex = 0;
-	
-	// TODO implement
+	// Restart element list
+	mElementList.clear();
 }
 
 bool GLVertexDeclarationImpl::setStream(BufferImpl* buffer, 
+										ElementSemantic semantic,
 									    int offset, 
-									    int semantic, 
-									    ElementType type, 
+										ElementDataType type,
 									    int stride, 
 									    bool normalize)
 {
-	// TODO implement
+	// Define buffer for this stream
+	if (buffer == nullptr)
+	{
+		return false;
+	}
 
-	return false;
+	// Parse type and size
+	GLint glSize = 4;
+	GLenum glType = GL_FLOAT;
+	GLViewImpl::parseDataType(type, glSize, glType);
+
+	// Get semantic index
+	const AttributeLocation* loc = std::find_if(attribute_locations,
+												attribute_locations + attribute_locations_size,
+												[semantic](AttributeLocation al) { return al.semantic == semantic; });
+
+	// Record element
+	StreamElement el;
+	el.semantic = semantic;
+	el.index = loc->location;
+	el.size = glSize;
+	el.type = glType;
+	el.stride = stride;
+	el.normalized = normalize;
+	el.offset = offset;
+	el.buffer = static_cast<GLBufferImpl*>(buffer);
+	mElementList.push_back(el);
+
+	// Retain buffer to prevent deletion
+	el.buffer->retain();
+
+	return true;
 }
 
 void GLVertexDeclarationImpl::end()
 {
-	// TODO implement
+	// Nothing to do
+}
+
+void GLVertexDeclarationImpl::bind()
+{
+	for (auto el : mElementList)
+	{
+		glBindBuffer(el.buffer->getBufferTarget(), el.buffer->getBufferName());
+		glEnableVertexAttribArray(el.index);
+		glVertexAttribPointer(el.index, el.size, el.type, el.normalized, el.stride, (GLvoid*)el.offset);
+	}
+}
+
+void GLVertexDeclarationImpl::unbind()
+{
+	// Unbind all buffers
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// Disable vertex attrib
+	for (auto el : mElementList)
+	{
+		glDisableVertexAttribArray(el.index);
+	}
 }
 
 /**************************************************************/
 
 GLVertexDeclarationVAOImpl::GLVertexDeclarationVAOImpl()
-	: mVertexArrayObject(0)
-	, mStreamIndex(0)
+	: GLVertexDeclarationImpl()
+	, mVertexArrayObject(0)
 {
 	
 }
@@ -113,76 +171,59 @@ bool GLVertexDeclarationVAOImpl::recreate()
 
 void GLVertexDeclarationVAOImpl::begin()
 {
-	mStreamIndex = 0;
-
 	// Bind vertex array
 	glBindVertexArray(mVertexArrayObject);
 }
 
 bool GLVertexDeclarationVAOImpl::setStream(BufferImpl* buffer, 
+										   ElementSemantic semantic,
 										   int offset, 
-										   int semantic, 
-										   ElementType type, 
+										   ElementDataType type,
 										   int stride, 
 										   bool normalize)
 {
-	// Define buffer for this stream
-	if (buffer == nullptr)
-	{
+	// Store in the element list
+	if (!GLVertexDeclarationImpl::setStream(buffer, semantic, offset, type, stride, normalize))
 		return false;
-	}
-
+	
 	GLBufferImpl* glBuffer = static_cast<GLBufferImpl*>(buffer);
 	glBindBuffer(glBuffer->getBufferTarget(), glBuffer->getBufferName());
 	
-	// Define vertex attrib pointer
+	// Parse type and size
 	GLint glSize = 4;
 	GLenum glType = GL_FLOAT;
-	switch (type)
-	{
-	case ElementType::Byte:
-		glSize = 1;
-		glType = GL_BYTE;
-		break;
-	case ElementType::UnsignedByte:
-		glSize = 1;
-		glType = GL_UNSIGNED_BYTE;
-		break;
-	case ElementType::Short:
-		glSize = 2;
-		glType = GL_BYTE;
-		break;
-	case ElementType::UnsignedShort:
-		glSize = 2;
-		glType = GL_UNSIGNED_SHORT;
-		break;
-	case ElementType::Integer:
-		glSize = 4;
-		glType = GL_BYTE;
-		break;
-	case ElementType::UnsignedInteger:
-		glSize = 4;
-		glType = GL_UNSIGNED_INT;
-		break;
-	case ElementType::Float:
-		glSize = 4;
-		glType = GL_FLOAT;
-		break;
-	}
-	glVertexAttribPointer(mStreamIndex,
-						  glSize,
-						  glType,
-						  normalize,
-						  stride,
-						  (GLvoid*) offset);
-						  
-	// Advance control variables
-	mStreamIndex++;
+	GLViewImpl::parseDataType(type, glSize, glType);
+
+	// Get semantic index
+	const AttributeLocation* loc = std::find_if(attribute_locations,
+												attribute_locations + attribute_locations_size,
+												[semantic](AttributeLocation al) { return al.semantic == semantic; });
+
+	// Set vertex attribute
+	glVertexAttribPointer(loc->location,
+							glSize,
+							glType,
+							normalize,
+							stride,
+							(GLvoid*) offset);
+	
+	return true;
 }
 
 void GLVertexDeclarationVAOImpl::end()
 {
 	// Just unbind vertex array, configuration is already copyed
+	glBindVertexArray(0);
+}
+
+void GLVertexDeclarationVAOImpl::bind()
+{
+	// Bind vertex array
+	glBindVertexArray(mVertexArrayObject);
+}
+
+void GLVertexDeclarationVAOImpl::unbind()
+{
 	glBindVertexArray(0);
 }
 

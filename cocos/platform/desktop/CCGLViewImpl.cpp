@@ -343,6 +343,41 @@ GLViewImpl* GLViewImpl::createWithFullScreen(const std::string& viewName, const 
     return nullptr;
 }
 
+void GLViewImpl::parseDataType(ElementDataType type, GLint& glSize, GLenum& glType)
+{
+	switch (type)
+	{
+	case ElementDataType::ByteType:
+		glSize = 1;
+		glType = GL_BYTE;
+		break;
+	case ElementDataType::UnsignedByteType:
+		glSize = 1;
+		glType = GL_UNSIGNED_BYTE;
+		break;
+	case ElementDataType::ShortType:
+		glSize = 2;
+		glType = GL_BYTE;
+		break;
+	case ElementDataType::UnsignedShortType:
+		glSize = 2;
+		glType = GL_UNSIGNED_SHORT;
+		break;
+	case ElementDataType::IntegerType:
+		glSize = 4;
+		glType = GL_BYTE;
+		break;
+	case ElementDataType::UnsignedIntegerType:
+		glSize = 4;
+		glType = GL_UNSIGNED_INT;
+		break;
+	case ElementDataType::FloatType:
+		glSize = 4;
+		glType = GL_FLOAT;
+		break;
+	}
+}
+
 
 bool GLViewImpl::initWithRect(const std::string& viewName, Rect rect, float frameZoomFactor)
 {
@@ -813,14 +848,111 @@ ProgramImpl* GLViewImpl::createProgram(const char* vertexShader, const char* fra
 	return nullptr;	
 }
 
-void GLViewImpl::draw(PrimitiveType primitiveType, int vertexStart, int vertexCount)
+void GLViewImpl::setTexture(TextureImpl* tex, int slot)
 {
-	
+	if (tex != nullptr)
+	{
+		GLTexture2DImpl* impl = static_cast<GLTexture2DImpl*>(tex);
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D, impl->getTextureName());
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
-void GLViewImpl::drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount)
+void GLViewImpl::setProgram(ProgramImpl* prog)
 {
-	
+	CCASSERT(prog != nullptr, "program could not be null");
+
+	GLProgramImpl* impl = static_cast<GLProgramImpl*>(prog);
+	glUseProgram(impl->getProgramName());
+}
+
+void GLViewImpl::setVertexDeclaration(VertexDeclarationImpl* decl)
+{
+	CCASSERT(decl != nullptr, "vertex declaration could not be null");
+
+	_vertexDeclaration = static_cast<GLVertexDeclarationImpl*>(decl);
+}
+
+void GLViewImpl::draw(PrimitiveTopology topology, int vertexStart, int vertexCount)
+{
+	GLenum mode;
+	switch (topology)
+	{
+	case PrimitiveTopology::Lines:
+		mode = GL_LINE;
+		break;
+	case PrimitiveTopology::LinesStrip:
+		mode = GL_LINE_STRIP;
+		break;
+	case PrimitiveTopology::Points:
+		mode = GL_POINTS;
+		break;
+	case PrimitiveTopology::Triangles:
+		mode = GL_TRIANGLES;
+		break;
+	case PrimitiveTopology::TrianglesStrip:
+		mode = GL_TRIANGLE_STRIP;
+		break;
+	}
+
+	// Set vertex declaration
+	CCASSERT(_vertexDeclaration != nullptr, "need a vertex declaration to draw");
+	_vertexDeclaration->bind();
+
+	// Draw
+	glDrawArrays(mode, vertexStart, vertexCount);
+
+	// Unbind vertex declaration
+	_vertexDeclaration->unbind();
+}
+
+void GLViewImpl::drawIndexed(PrimitiveTopology topology, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexStart, int indexCount)
+{
+	CCASSERT(indexBuffer != nullptr, "index buffer could not be null");
+
+	GLenum mode;
+	switch (topology)
+	{
+	case PrimitiveTopology::Lines:
+		mode = GL_LINE;
+		break;
+	case PrimitiveTopology::LinesStrip:
+		mode = GL_LINE_STRIP;
+		break;
+	case PrimitiveTopology::Points:
+		mode = GL_POINTS;
+		break;
+	case PrimitiveTopology::Triangles:
+		mode = GL_TRIANGLES;
+		break;
+	case PrimitiveTopology::TrianglesStrip:
+		mode = GL_TRIANGLE_STRIP;
+		break;
+	}
+
+	GLBufferImpl* glIndexBuffer = static_cast<GLBufferImpl*>(indexBuffer);
+
+	// Bind index buffer (before vertex declaration)
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glIndexBuffer->getBufferName());
+
+	// Set vertex declaration
+	CCASSERT(_vertexDeclaration != nullptr, "need a vertex declaration to draw");
+	_vertexDeclaration->bind();
+
+	// Draw elements
+	GLenum idxType = glIndexBuffer->getType() == BufferImpl::BufferType::Index_16bits ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+	GLvoid* offset = (GLvoid*)(indexStart * (idxType == GL_UNSIGNED_SHORT ? 2 : 4));
+	glDrawElements(mode, indexCount, idxType, (GLvoid*)offset);
+
+	// Unbind vertex declaration
+	_vertexDeclaration->unbind();
+
+	// Unbind index buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)

@@ -38,7 +38,6 @@ class Image;
 typedef struct _MipmapInfo MipmapInfo;
 
 
-
 class ResourceImpl : public Ref
 {
 public:
@@ -196,9 +195,9 @@ public:
 
 	// 
 	virtual bool setStream(BufferImpl* buffer, 
+						   ElementSemantic semantic,
 						   int offset, 
-						   int semantic, 
-						   ElementType type, 
+						   ElementDataType type,
 						   int stride, 
 						   bool normalize) = 0;
 	
@@ -206,13 +205,13 @@ public:
 	virtual void end() = 0;
 };
 
-class ProgramImpl : public Ref
+class ProgramImpl : public ResourceImpl
 {
 public:
 	// Info about uniforms will be available with tuples
 	typedef std::tuple</*location*/unsigned int, 
 					   /*name*/std::string, 
-					   /*element type*/ElementType, 
+					   /*element type*/ElementDataType,
 					   /*num elements*/unsigned int, 
 					   /*array size*/unsigned int> UniformInfo;
 	typedef std::vector<UniformInfo> UniformInfoList;
