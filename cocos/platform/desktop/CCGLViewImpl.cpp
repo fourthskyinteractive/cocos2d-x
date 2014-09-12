@@ -813,12 +813,12 @@ ProgramImpl* GLViewImpl::createProgram(const char* vertexShader, const char* fra
 	return nullptr;	
 }
 
-void GLViewImpl::draw(PrimitiveType primitiveType, int vertexStart, int vertexCount)
+void GLViewImpl::draw(PrimitiveTopology topology, int vertexStart, int vertexCount)
 {
 	
 }
 
-void GLViewImpl::drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount)
+void GLViewImpl::drawIndexed(PrimitiveTopology topology, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount)
 {
 	
 }

@@ -49,6 +49,8 @@ bool GLVertexDeclarationImpl::init()
 bool GLVertexDeclarationImpl::recreate()
 {
 	// TODO implement
+
+	return false;
 }
 
 void GLVertexDeclarationImpl::begin()
@@ -61,7 +63,7 @@ void GLVertexDeclarationImpl::begin()
 bool GLVertexDeclarationImpl::setStream(BufferImpl* buffer, 
 									    int offset, 
 									    int semantic, 
-									    ElementType type, 
+										ElementDataType type,
 									    int stride, 
 									    bool normalize)
 {
@@ -122,7 +124,7 @@ void GLVertexDeclarationVAOImpl::begin()
 bool GLVertexDeclarationVAOImpl::setStream(BufferImpl* buffer, 
 										   int offset, 
 										   int semantic, 
-										   ElementType type, 
+										   ElementDataType type,
 										   int stride, 
 										   bool normalize)
 {
@@ -140,31 +142,31 @@ bool GLVertexDeclarationVAOImpl::setStream(BufferImpl* buffer,
 	GLenum glType = GL_FLOAT;
 	switch (type)
 	{
-	case ElementType::Byte:
+	case ElementDataType::ByteType:
 		glSize = 1;
 		glType = GL_BYTE;
 		break;
-	case ElementType::UnsignedByte:
+	case ElementDataType::UnsignedByteType:
 		glSize = 1;
 		glType = GL_UNSIGNED_BYTE;
 		break;
-	case ElementType::Short:
+	case ElementDataType::ShortType:
 		glSize = 2;
 		glType = GL_BYTE;
 		break;
-	case ElementType::UnsignedShort:
+	case ElementDataType::UnsignedShortType:
 		glSize = 2;
 		glType = GL_UNSIGNED_SHORT;
 		break;
-	case ElementType::Integer:
+	case ElementDataType::IntegerType:
 		glSize = 4;
 		glType = GL_BYTE;
 		break;
-	case ElementType::UnsignedInteger:
+	case ElementDataType::UnsignedIntegerType:
 		glSize = 4;
 		glType = GL_UNSIGNED_INT;
 		break;
-	case ElementType::Float:
+	case ElementDataType::FloatType:
 		glSize = 4;
 		glType = GL_FLOAT;
 		break;

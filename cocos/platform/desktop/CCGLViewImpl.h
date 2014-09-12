@@ -167,9 +167,9 @@ protected:
 	
 	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader) override;
 	
-	virtual void draw(PrimitiveType primitiveType, int vertexStart, int vertexCount) override;
+	virtual void draw(PrimitiveTopology topology, int vertexStart, int vertexCount) override;
 	
-	virtual void drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) override;
+	virtual void drawIndexed(PrimitiveTopology topology, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) override;
 
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(GLViewImpl);

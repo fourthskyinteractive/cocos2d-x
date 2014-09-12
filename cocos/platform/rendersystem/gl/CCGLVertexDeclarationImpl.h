@@ -52,7 +52,7 @@ public:
 	virtual bool setStream(BufferImpl* buffer, 
 						   int offset, 
 						   int semantic, 
-						   ElementType type, 
+						   ElementDataType type,
 						   int stride, 
 						   bool normalize = false) override;
 	
@@ -83,7 +83,7 @@ public:
 	virtual bool setStream(BufferImpl* buffer,
 							int offset,
 							int semantic,
-							ElementType type,
+							ElementDataType type,
 							int stride,
 							bool normalize = false) override;
 

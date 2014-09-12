@@ -40,26 +40,26 @@ NS_CC_BEGIN
 struct Color4B;
 struct Color4F;
 
-typedef enum ElementType
+typedef enum ElementDataType
 {
-	Byte,
-	UnsignedByte,
-	Short,
-	UnsignedShort,
-	Int,
-	UnsignedInt,
-	Float,
+	ByteType,
+	UnsignedByteType,
+	ShortType,
+	UnsignedShortType,
+	IntegerType,
+	UnsignedIntegerType,
+	FloatType,
 	
 	ElementMax
 };
 
-typedef enum PrimitiveType
+typedef enum PrimitiveTopology
 {
-	Point = 0,
-	Line,
-	LineStrip,
-	Triangle,
-	TriangleStrip,
+	Points = 0,
+	Lines,
+	LinesStrip,
+	Triangles,
+	TrianglesStrip,
 	
 	PrimitiveMax
 };
