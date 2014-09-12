@@ -2,6 +2,7 @@
 Copyright (c) 2008      Apple Inc. All Rights Reserved.
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2013-2014 Chukong Technologies Inc.
+Copyright (c) 2014 Fourth Sky Interactive
 
 http://www.cocos2d-x.org
 
@@ -222,6 +223,13 @@ public:
 
     /** Update with texture data*/
     bool updateWithData(const void *data,int offsetX,int offsetY,int width,int height);
+
+
+	/** Initialize texture depends of render system
+	@since v3.2 (New Render System Simpler branch)
+	*/
+	bool _initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, Texture2D::PixelFormat pixelFormat, int pixelsWide, int pixelsHigh);
+
     /**
     Drawing extensions to make it easy to draw basic quads using a Texture2D object.
     These functions require GL_TEXTURE_2D and both GL_VERTEX_ARRAY and GL_TEXTURE_COORD_ARRAY client states to be enabled.
@@ -298,6 +306,16 @@ public:
     @since v0.99.0
     */
     void generateMipmap();
+
+	/** Bind texture to specified bind point
+	@since v3.2 (New Render System Simpler branch)
+	*/
+	void bind(GLint slot = 0);
+
+	/** Unbind texture to specified bind point
+	@since v3.2 (New Render System Simpler branch)
+	*/
+	void unbind(GLint slot = 0);
 
     /** returns the pixel format.
      @since v2.0

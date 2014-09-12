@@ -4,7 +4,8 @@ Copyright 2012 Goffredo Marocchi
 Copyright 2012 Ricardo Quesada
 Copyright 2012 cocos2d-x.org
 Copyright 2013-2014 Chukong Technologies Inc.
- 
+Copyright 2014 Fourth Sky Interactive
+
  
 http://www.cocos2d-x.org
  
@@ -162,6 +163,8 @@ public:
      * @js initWithString
      * @lua initWithString
      */
+
+	void releaseGLProgram();
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT) || (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
     /** Initializes the CCGLProgram with precompiled shader program */
