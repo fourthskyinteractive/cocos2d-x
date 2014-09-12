@@ -40,7 +40,7 @@ NS_CC_BEGIN
 struct Color4B;
 struct Color4F;
 
-typedef enum ElementDataType
+enum class CC_DLL ElementDataType
 {
 	ByteType,
 	UnsignedByteType,
@@ -53,7 +53,17 @@ typedef enum ElementDataType
 	ElementMax
 };
 
-typedef enum PrimitiveTopology
+enum class CC_DLL ElementSemantic
+{
+	POSITION,
+	COLOR,
+	TEX_COORD,
+	NORMAL,
+	BLEND_WEIGHT,
+	BLEND_INDEX
+};
+
+enum class CC_DLL PrimitiveTopology
 {
 	Points = 0,
 	Lines,

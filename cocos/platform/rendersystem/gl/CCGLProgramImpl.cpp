@@ -25,6 +25,7 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "platform/rendersystem/gl/CCGLProgramImpl.h"
+#include "platform/rendersystem/gl/CCGLRenderSystem.h"
 #include "platform/CCFileUtils.h"
 
 NS_CC_BEGIN
@@ -253,6 +254,13 @@ bool GLProgramImpl::compileShader(GLuint* shader, GLenum type, const GLchar* sou
     }
 	
 	return (status == GL_TRUE);
+}
+
+void GLProgramImpl::bindPredefinedVertexAttribs()
+{
+	for (int i = 0; i<attribute_locations_size; i++) {
+		glBindAttribLocation(mProgramName, attribute_locations[i].location, attribute_locations[i].attributeName);
+	}
 }
 
 bool GLProgramImpl::link()

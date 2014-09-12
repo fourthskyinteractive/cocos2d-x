@@ -195,39 +195,7 @@ Vec2 GLView::getVisibleOrigin() const
         return Vec2::ZERO;
     }
 }
-/*
-void GLView::setViewPortInPoints(float x , float y , float w , float h)
-{
-    glViewport((GLint)(x * _scaleX + _viewPortRect.origin.x),
-               (GLint)(y * _scaleY + _viewPortRect.origin.y),
-               (GLsizei)(w * _scaleX),
-               (GLsizei)(h * _scaleY));
-}
 
-void GLView::setScissorInPoints(float x , float y , float w , float h)
-{
-    glScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
-              (GLint)(y * _scaleY + _viewPortRect.origin.y),
-              (GLsizei)(w * _scaleX),
-              (GLsizei)(h * _scaleY));
-}
-
-bool GLView::isScissorEnabled()
-{
-	return (GL_FALSE == glIsEnabled(GL_SCISSOR_TEST)) ? false : true;
-}
-
-Rect GLView::getScissorRect() const
-{
-	GLfloat params[4];
-	glGetFloatv(GL_SCISSOR_BOX, params);
-	float x = (params[0] - _viewPortRect.origin.x) / _scaleX;
-	float y = (params[1] - _viewPortRect.origin.y) / _scaleY;
-	float w = params[2] / _scaleX;
-	float h = params[3] / _scaleY;
-	return Rect(x, y, w, h);
-}
-*/
 void GLView::setViewName(const std::string& viewname )
 {
     _viewName = viewname;

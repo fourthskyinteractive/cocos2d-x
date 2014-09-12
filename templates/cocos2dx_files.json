@@ -841,6 +841,8 @@
         "cocos/platform/apple/CCThread.mm", 
         "cocos/platform/desktop/CCGLViewImpl.cpp", 
         "cocos/platform/desktop/CCGLViewImpl.h", 
+		"cocos/platform/rendersystem/gl/CCGLRenderSystem.cpp",
+		"cocos/platform/rendersystem/gl/CCGLRenderSystem.h",
 		"cocos/platform/rendersystem/gl/CCGLBufferImpl.cpp",
 		"cocos/platform/rendersystem/gl/CCGLBufferImpl.h",
 		"cocos/platform/rendersystem/gl/CCGLProgramImpl.cpp",

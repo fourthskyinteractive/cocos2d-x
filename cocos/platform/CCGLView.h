@@ -264,10 +264,20 @@ protected:
 	virtual VertexDeclarationImpl* createVertexDeclaration() = 0;
 	
 	virtual ProgramImpl* createProgram(const char* vertexShader, const char* fragmentShader) = 0;
+
+	virtual void setTexture(TextureImpl* tex, int slot) = 0;
+
+	virtual void setTexture(TextureImpl* tex) {
+		this->setTexture(tex, 0);
+	}
+
+	virtual void setProgram(ProgramImpl* prog) = 0;
+
+	virtual void setVertexDeclaration(VertexDeclarationImpl* decl) = 0;
 	
-	virtual void draw(PrimitiveType primitiveType, int vertexStart, int vertexCount) = 0;
+	virtual void draw(PrimitiveTopology topology, int vertexStart, int vertexCount) = 0;
 	
-	virtual void drawIndexed(PrimitiveType primitiveType, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexCount) = 0;
+	virtual void drawIndexed(PrimitiveTopology topology, int vertexStart, int vertexCount, BufferImpl* indexBuffer, int indexStart, int indexCount) = 0;
 	
 	/**
 	 *	Make friend the classes that will use the internal implementations

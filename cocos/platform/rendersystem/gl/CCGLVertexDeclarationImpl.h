@@ -33,6 +33,7 @@ THE SOFTWARE.
 NS_CC_BEGIN
 
 // Forward declarations
+class GLBufferImpl;
 
 class GLVertexDeclarationImpl : public VertexDeclarationImpl
 {
@@ -50,6 +51,7 @@ public:
 	virtual void begin() override;
  
 	virtual bool setStream(BufferImpl* buffer, 
+						   ElementSemantic semantic,
 						   int offset, 
 						   int semantic, 
 						   ElementDataType type,
@@ -57,22 +59,39 @@ public:
 						   bool normalize = false) override;
 	
 	virtual void end() override;
+
+	virtual void bind();
+
+	virtual void unbind();
 	
 protected:
-	unsigned int mStreamIndex;
+	// Attribute to enable and disable vertex attribs
+	uint32_t s_attributeFlags = 0;  // 32 attributes max
+
+	typedef struct StreamElement {
+		ElementSemantic semantic;
+		GLuint index;
+		GLint size;
+		GLenum type;
+		GLsizei stride;
+		GLboolean normalized;
+		GLuint offset;
+		GLBufferImpl* buffer;
+	};
+	std::vector<StreamElement> mElementList;
 	
 private:
 	CC_DISALLOW_COPY_AND_ASSIGN(GLVertexDeclarationImpl);
 };
 
-class GLVertexDeclarationVAOImpl : public VertexDeclarationImpl
+class GLVertexDeclarationVAOImpl : public GLVertexDeclarationImpl
 {
 public:
 	GLVertexDeclarationVAOImpl();
 	~GLVertexDeclarationVAOImpl();
 	
 	// Specific query methods
-	GLuint getVertexArray() const { return mVertexArrayObject; }
+	
 	
 	virtual bool init() override;
 	
@@ -81,6 +100,7 @@ public:
 	virtual void begin() override;
 
 	virtual bool setStream(BufferImpl* buffer,
+							ElementSemantic	semantic,
 							int offset,
 							int semantic,
 							ElementDataType type,
@@ -88,10 +108,13 @@ public:
 							bool normalize = false) override;
 
 	virtual void end() override;
+
+	virtual void bind() override;
+
+	virtual void unbind() override;
 	
 protected:
-	mutable GLuint mVertexArrayObject;
-	unsigned int mStreamIndex;
+	GLuint mVertexArrayObject;
 	
 private:
 	CC_DISALLOW_COPY_AND_ASSIGN(GLVertexDeclarationVAOImpl);
