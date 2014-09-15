@@ -245,9 +245,6 @@ void Director::setGLDefaultValues()
     // [self setDepthTest: view_.depthFormat];
     setDepthTest(false);
     setProjection(_projection);
-
-    // set other opengl default values
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 // Draw the Scene
@@ -274,7 +271,8 @@ void Director::drawScene()
         _eventDispatcher->dispatchEvent(_eventAfterUpdate);
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	_openGLView->clearView(true, true);
 
     /* to avoid flickr, nextScene MUST be here: after tick and before draw.
      XXX: Which bug is this one. It seems that it can't be reproduced with v0.9 */
@@ -718,32 +716,12 @@ float Director::getZEye(void) const
 
 void Director::setAlphaBlending(bool on)
 {
-    if (on)
-    {
-        GL::blendFunc(CC_BLEND_SRC, CC_BLEND_DST);
-    }
-    else
-    {
-        GL::blendFunc(GL_ONE, GL_ZERO);
-    }
-
-    CHECK_GL_ERROR_DEBUG();
+	_openGLView->setAlphaBlending(on);
 }
 
 void Director::setDepthTest(bool on)
 {
-    if (on)
-    {
-        glClearDepth(1.0f);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-//        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    }
-    else
-    {
-        glDisable(GL_DEPTH_TEST);
-    }
-    CHECK_GL_ERROR_DEBUG();
+	_openGLView->setDepthTest(on);
 }
 
 static void GLToClipTransform(Mat4 *transformOut)
@@ -1017,8 +995,6 @@ void Director::purgeDirector()
 
     // cocos2d-x specific data structures
     UserDefault::destroyInstance();
-    
-    GL::invalidateStateCache();
     
     destroyTextureCache();
 

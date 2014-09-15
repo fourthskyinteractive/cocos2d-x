@@ -97,7 +97,7 @@ void Primitive::draw()
         }
         else
         {
-            glDrawArrays((GLenum)_type, _count, _start);
+			glDrawArrays((GLenum)_type, _start, _count);
         }
         
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

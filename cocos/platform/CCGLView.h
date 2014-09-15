@@ -66,6 +66,8 @@ enum class ResolutionPolicy
 
 NS_CC_BEGIN
 
+class IndexBuffer;
+
 /**
  * @addtogroup platform
  * @{
@@ -92,6 +94,22 @@ public:
 
     /** Exchanges the front and back buffers, subclass must implement this method. */
     virtual void swapBuffers() = 0;
+
+	/** Clear screen view */
+	virtual void clearView(bool depth = false, bool stencil = false) = 0;
+
+	/** Set alpha blending */
+	virtual void setAlphaBlending(bool on) = 0;
+
+	/** Set depth test */
+	virtual void setDepthTest(bool on) = 0;
+
+	/** Draw vertices */
+	virtual void draw(GLenum primitive, GLint first, GLsizei count) = 0;
+
+	/** Draw vertices using indices */
+	virtual void drawElements(GLenum primitive, GLsizei count, IndexBuffer* indices, GLuint offset) = 0;
+
 
     /** Open or close IME keyboard , subclass must implement this method. */
     virtual void setIMEKeyboardState(bool open) = 0;

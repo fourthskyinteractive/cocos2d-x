@@ -39,6 +39,9 @@ NS_CC_BEGIN
 class Texture2D;
 class EventCustom;
 class EventListenerCustom;
+class VertexBuffer;
+class IndexBuffer;
+class VertexData;
 
 /**
  * @addtogroup textures
@@ -225,14 +228,14 @@ private:
     void renderCommand();
 
     void setupIndices();
-    void mapBuffers();
     void setupVBOandVAO();
-    void setupVBO();
+	void mapBuffers();
 
 protected:
     GLushort*           _indices;
-    GLuint              _VAOname;
-    GLuint              _buffersVBO[2]; //0: vertex  1: indices
+	VertexData*			_vertexData;
+	VertexBuffer*		_vertexBuffer;
+	IndexBuffer*		_indexBuffer;
     bool                _dirty; //indicates whether or not the array buffer of the VBO needs to be updated
     /** quantity of quads that are going to be drawn */
     ssize_t _totalQuads;

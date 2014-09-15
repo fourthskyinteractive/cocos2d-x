@@ -72,6 +72,7 @@ public:
     VertexBuffer* getStreamBuffer(int semantic) const;
     
     void use();
+	void disable();
 protected:
     VertexData();
     virtual ~VertexData();
@@ -83,6 +84,7 @@ protected:
     };
     
     std::map<int, BufferAttribute> _vertexStreams;
+	GLuint _VAO;
 };
 
 NS_CC_END

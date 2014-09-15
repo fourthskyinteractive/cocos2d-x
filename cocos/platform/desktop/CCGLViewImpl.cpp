@@ -1,6 +1,7 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2013-2014 Chukong Technologies Inc.
+Copyright (c) 2014 Fourth Sky Interactive
 
 http://www.cocos2d-x.org
 
@@ -33,6 +34,7 @@ THE SOFTWARE.
 #include "base/CCIMEDispatcher.h"
 #include "base/ccUtils.h"
 #include "base/ccUTF8.h"
+#include "renderer/CCVertexIndexBuffer.h"
 
 #include <unordered_map>
 
@@ -383,6 +385,9 @@ bool GLViewImpl::initWithRect(const std::string& viewName, Rect rect, float fram
     // Enable point size by default.
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
+	// set other opengl default values
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
     return true;
 }
 
@@ -420,6 +425,8 @@ bool GLViewImpl::isOpenGLReady()
 
 void GLViewImpl::end()
 {
+	GL::invalidateStateCache();
+
     if(_mainWindow)
     {
         glfwSetWindowShouldClose(_mainWindow,1);
@@ -433,6 +440,78 @@ void GLViewImpl::swapBuffers()
 {
     if(_mainWindow)
         glfwSwapBuffers(_mainWindow);
+}
+
+void GLViewImpl::clearView(bool depth, bool stencil)
+{
+	GLbitfield flags = GL_COLOR_BUFFER_BIT;
+	if (depth)
+		flags |= GL_DEPTH_BUFFER_BIT;
+	if (stencil)
+		flags |= GL_STENCIL_BUFFER_BIT;
+
+	glClear(flags);
+}
+
+void GLViewImpl::setAlphaBlending(bool on)
+{
+	if (on)
+	{
+		GL::blendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+	}
+	else
+	{
+		GL::blendFunc(GL_ONE, GL_ZERO);
+	}
+
+	CHECK_GL_ERROR_DEBUG();
+}
+
+void GLViewImpl::setDepthTest(bool on)
+{
+	if (on)
+	{
+		glClearDepth(1.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	}
+	else
+	{
+		glDisable(GL_DEPTH_TEST);
+	}
+	CHECK_GL_ERROR_DEBUG();
+}
+
+void GLViewImpl::draw(GLenum primitive, GLint first, GLsizei count)
+{
+	// Draw
+	glDrawArrays(primitive, first, count);
+
+	// Check error after draw
+	CHECK_GL_ERROR_DEBUG();
+
+	// Just for safety, unbind all buffers 
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void GLViewImpl::drawElements(GLenum primitive, GLsizei count, IndexBuffer* indices, GLuint offset)
+{
+	GLenum type = indices->getType() == IndexBuffer::IndexType::INDEX_TYPE_SHORT_16 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+	GLuint realOffset = offset * (indices->getType() == IndexBuffer::IndexType::INDEX_TYPE_SHORT_16 ? 2 : 4);
+
+	// Bind index buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices->getVBO());
+	
+	// Draw
+	glDrawElements(primitive, count, type, (GLvoid*)realOffset);
+
+	// Check error after draw
+	CHECK_GL_ERROR_DEBUG();
+
+	// Just for safety, unbind all buffers
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 bool GLViewImpl::windowShouldClose()

@@ -448,6 +448,9 @@
     <ClCompile Include="..\renderer\CCGLProgram.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
+	<ClCompile Include="..\renderer\CCGLProgram-ogl2.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
     <ClCompile Include="..\renderer\CCGLProgramCache.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
@@ -476,6 +479,9 @@
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\renderer\CCTexture2D.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+	<ClCompile Include="..\renderer\CCTexture2D-ogl2.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\renderer\CCTextureAtlas.cpp">
@@ -574,6 +580,9 @@
     <ClCompile Include="..\platform\desktop\CCGLViewImpl.cpp">
       <Filter>platform\desktop</Filter>
     </ClCompile>
+	<ClCompile Include="..\platform\desktop\CCGLViewImpl-ogl2.cpp">
+      <Filter>platform\desktop</Filter>
+    </ClCompile>
     <ClCompile Include="..\platform\CCGLView.cpp">
       <Filter>platform</Filter>
     </ClCompile>
@@ -592,7 +601,13 @@
     <ClCompile Include="..\renderer\CCVertexIndexBuffer.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
+	<ClCompile Include="..\renderer\CCVertexIndexBuffer-ogl2.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
     <ClCompile Include="..\renderer\CCVertexIndexData.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+	<ClCompile Include="..\renderer\CCVertexIndexData-ogl2.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\base\CCModuleManager.cpp">

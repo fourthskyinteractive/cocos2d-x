@@ -265,6 +265,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClCompile Include="..\platform\CCImage.cpp" />
     <ClCompile Include="..\platform\CCSAXParser.cpp" />
     <ClCompile Include="..\platform\CCThread.cpp" />
+	<ClCompile Include="..\platform\desktop\CCGLViewImpl-ogl2.cpp" />
     <ClCompile Include="..\platform\desktop\CCGLViewImpl.cpp" />
     <ClCompile Include="..\platform\win32\CCApplication.cpp" />
     <ClCompile Include="..\platform\win32\CCCommon.cpp" />
@@ -274,6 +275,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClCompile Include="..\renderer\CCBatchCommand.cpp" />
     <ClCompile Include="..\renderer\CCCustomCommand.cpp" />
     <ClCompile Include="..\renderer\CCGLProgram.cpp" />
+	<ClCompile Include="..\renderer\CCGLProgram-ogl2.cpp" />
     <ClCompile Include="..\renderer\CCGLProgramCache.cpp" />
     <ClCompile Include="..\renderer\CCGLProgramState.cpp" />
     <ClCompile Include="..\renderer\CCGLProgramStateCache.cpp" />
@@ -287,10 +289,13 @@ xcopy /Y /Q "$(ProjectDir)..\..\external\win32-specific\gles\prebuilt\*.*" "$(Ou
     <ClCompile Include="..\renderer\CCRenderer.cpp" />
     <ClCompile Include="..\renderer\ccShaders.cpp" />
     <ClCompile Include="..\renderer\CCTexture2D.cpp" />
+	<ClCompile Include="..\renderer\CCTexture2D-ogl2.cpp" />
     <ClCompile Include="..\renderer\CCTextureAtlas.cpp" />
     <ClCompile Include="..\renderer\CCTextureCache.cpp" />
     <ClCompile Include="..\renderer\CCVertexIndexBuffer.cpp" />
+	<ClCompile Include="..\renderer\CCVertexIndexBuffer-ogl2.cpp" />
     <ClCompile Include="..\renderer\CCVertexIndexData.cpp" />
+	<ClCompile Include="..\renderer\CCVertexIndexData-ogl2.cpp" />
     <ClCompile Include="..\storage\local-storage\LocalStorage.cpp" />
     <ClCompile Include="CCAction.cpp" />
     <ClCompile Include="CCActionCamera.cpp" />

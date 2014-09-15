@@ -255,6 +255,46 @@ std::string GLProgram::getProgramLog() const
     return this->logForOpenGLObject(_program, (GLInfoFunction)&glGetProgramiv, (GLLogFunction)&glGetProgramInfoLog);
 }
 
+void GLProgram::updateUniforms()
+{
+	_builtInUniforms[UNIFORM_P_MATRIX] = getUniformLocationForName(UNIFORM_NAME_P_MATRIX);
+	_builtInUniforms[UNIFORM_MV_MATRIX] = getUniformLocationForName(UNIFORM_NAME_MV_MATRIX);
+	_builtInUniforms[UNIFORM_MVP_MATRIX] = getUniformLocationForName(UNIFORM_NAME_MVP_MATRIX);
+
+	_builtInUniforms[UNIFORM_TIME] = getUniformLocationForName(UNIFORM_NAME_TIME);
+	_builtInUniforms[UNIFORM_SIN_TIME] = getUniformLocationForName(UNIFORM_NAME_SIN_TIME);
+	_builtInUniforms[UNIFORM_COS_TIME] = getUniformLocationForName(UNIFORM_NAME_COS_TIME);
+
+	_builtInUniforms[UNIFORM_RANDOM01] = getUniformLocationForName(UNIFORM_NAME_RANDOM01);
+
+	_builtInUniforms[UNIFORM_SAMPLER0] = getUniformLocationForName(UNIFORM_NAME_SAMPLER0);
+	_builtInUniforms[UNIFORM_SAMPLER1] = getUniformLocationForName(UNIFORM_NAME_SAMPLER1);
+	_builtInUniforms[UNIFORM_SAMPLER2] = getUniformLocationForName(UNIFORM_NAME_SAMPLER2);
+	_builtInUniforms[UNIFORM_SAMPLER3] = getUniformLocationForName(UNIFORM_NAME_SAMPLER3);
+
+	_flags.usesP = _builtInUniforms[UNIFORM_P_MATRIX] != -1;
+	_flags.usesMV = _builtInUniforms[UNIFORM_MV_MATRIX] != -1;
+	_flags.usesMVP = _builtInUniforms[UNIFORM_MVP_MATRIX] != -1;
+	_flags.usesTime = (
+		_builtInUniforms[UNIFORM_TIME] != -1 ||
+		_builtInUniforms[UNIFORM_SIN_TIME] != -1 ||
+		_builtInUniforms[UNIFORM_COS_TIME] != -1
+		);
+	_flags.usesRandom = _builtInUniforms[UNIFORM_RANDOM01] != -1;
+
+	this->use();
+
+	// Since sample most probably won't change, set it to 0,1,2,3 now.
+	if (_builtInUniforms[UNIFORM_SAMPLER0] != -1)
+		setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER0], 0);
+	if (_builtInUniforms[UNIFORM_SAMPLER1] != -1)
+		setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER1], 1);
+	if (_builtInUniforms[UNIFORM_SAMPLER2] != -1)
+		setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER2], 2);
+	if (_builtInUniforms[UNIFORM_SAMPLER3] != -1)
+		setUniformLocationWith1i(_builtInUniforms[UNIFORM_SAMPLER3], 3);
+}
+
 // Uniform cache
 
 bool GLProgram::updateUniformLocation(GLint location, const GLvoid* data, unsigned int bytes)

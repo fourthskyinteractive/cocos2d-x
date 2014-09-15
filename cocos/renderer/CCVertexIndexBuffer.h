@@ -1,5 +1,7 @@
+
 /****************************************************************************
  Copyright (c) 2013-2014 Chukong Technologies Inc.
+ Copyright (c) 2014 Fourth Sky Interactive
 
  http://www.cocos2d-x.org
 
@@ -35,11 +37,13 @@ class EventListenerCustom;
 class CC_DLL VertexBuffer : public Ref
 {
 public:
-    static VertexBuffer* create(int sizePerVertex, int vertexNumber);
+    static VertexBuffer* create(int sizePerVertex, int vertexNumber, bool dynamic = false);
     
     int getSizePerVertex() const;
     int getVertexNumber() const;
     bool updateVertices(const void* verts, int count, int begin);
+	void* map();
+	void unmap();
 
     int getSize() const;
     
@@ -48,20 +52,23 @@ public:
 protected:
     VertexBuffer();
     virtual ~VertexBuffer();
-    
-    bool init(int sizePerVertex, int vertexNumber);
-protected:
-    //event listener for foreground
-    void recreateVBO() const;
-    EventListenerCustom* _recreateVBOEventListener;
-protected:
+	void releaseGLBuffer();
+	bool init(int sizePerVertex, int vertexNumber, bool dynamic);
+
     mutable GLuint _vbo;
     int _sizePerVertex;
     int _vertexNumber;
+	bool _dynamic;
+	GLenum _access;
+
+	//event listener for foreground
+	void recreateVBO() const;
+	EventListenerCustom* _recreateVBOEventListener;
+
     //buffer used for shadow copy
     std::vector<unsigned char> _shadowCopy;
-protected:
     static bool _enableShadowCopy;
+
 public:
     static bool isShadowCopyEnabled() { return _enableShadowCopy; }
     static void enableShadowCopy(bool enabled) { _enableShadowCopy = enabled; }
@@ -77,12 +84,14 @@ public:
     };
     
 public:
-    static IndexBuffer* create(IndexType type, int number);
+	static IndexBuffer* create(IndexType type, int number, bool dynamic = false);
     
     IndexType getType() const;
     int getSizePerIndex() const;
     int getIndexNumber() const;
     bool updateIndices(const void* indices, int count, int begin);
+	void* map();
+	void unmap();
 
     int getSize() const;
     
@@ -91,22 +100,22 @@ public:
 protected:
     IndexBuffer();
     virtual ~IndexBuffer();
+	void releaseGLBuffer();
+	bool init(IndexType type, int number, bool dynamic);
     
-    bool init(IndexType type, int number);
-    
-protected:
     mutable GLuint _vbo;
     IndexType _type;
     int _indexNumber;
-    
-protected:
+	bool _dynamic;
+	GLenum _access;
+
     //event listener for foreground
     void recreateVBO() const;
     EventListenerCustom* _recreateVBOEventListener;
     //buffer used for shadow copy
     std::vector<unsigned char> _shadowCopy;
-protected:
     static bool _enableShadowCopy;
+
 public:
     static bool isShadowCopyEnabled() { return _enableShadowCopy; }
     static void enableShadowCopy(bool enabled) { _enableShadowCopy = enabled; }

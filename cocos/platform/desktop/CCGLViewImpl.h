@@ -82,6 +82,11 @@ public:
     virtual bool isOpenGLReady() override;
     virtual void end() override;
     virtual void swapBuffers() override;
+	virtual void clearView(bool depth, bool stencil) override;
+	virtual void setAlphaBlending(bool on) override;
+	virtual void setDepthTest(bool on) override;
+	virtual void draw(GLenum primitive, GLint first, GLsizei count) override;
+	virtual void drawElements(GLenum primitive, GLsizei count, IndexBuffer* indices, GLuint offset) override;
     virtual void setFrameSize(float width, float height) override;
     virtual void setIMEKeyboardState(bool bOpen) override;
 
