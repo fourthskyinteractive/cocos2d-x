@@ -35,6 +35,7 @@ THE SOFTWARE.
 NS_CC_BEGIN
 
 class EventCustom;
+class FrameBuffer;
 
 /**
  * @addtogroup textures
@@ -185,11 +186,8 @@ protected:
     Rect         _fullRect;
     Rect         _fullviewPort;
     
-    GLuint       _FBO;
-    GLuint       _depthRenderBufffer;
-    GLint        _oldFBO;
-    Texture2D* _texture;
-    Texture2D* _textureCopy;    // a copy of _texture
+	FrameBuffer* _frameBuffer;
+
     Image*     _UITextureImage;
     Texture2D::PixelFormat _pixelFormat;
     

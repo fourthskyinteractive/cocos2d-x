@@ -1,0 +1,92 @@
+/****************************************************************************
+Copyright (c) 2008      Apple Inc. All Rights Reserved.
+Copyright (c) 2010-2012 cocos2d-x.org
+Copyright (c) 2013-2014 Chukong Technologies Inc.
+Copyright (c) 2014 Fourth Sky Interactive
+
+http://www.cocos2d-x.org
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+****************************************************************************/
+
+#ifndef __CCFRAMEBUFFER_H__
+#define __CCFRAMEBUFFER_H__
+
+#include "base/CCVector.h"
+
+#include "base/CCRef.h"
+#include "base/ccTypes.h"
+#ifdef EMSCRIPTEN
+#include "CCGLBufferedNode.h"
+#endif // EMSCRIPTEN
+#include "renderer/CCTexture2D.h"
+
+NS_CC_BEGIN
+
+
+class CC_DLL FrameBuffer : public Ref
+#ifdef EMSCRIPTEN
+	, public GLBufferedNode
+#endif // EMSCRIPTEN
+{
+public:
+
+	FrameBuffer();
+
+	virtual ~FrameBuffer();
+
+	virtual void releaseGLObjects();
+
+	static FrameBuffer* create(int width, int height, Texture2D::PixelFormat format, GLenum depthStencilFormat = 0, int samples = 1);
+	
+	virtual GLint getFBO() const;
+	virtual Texture2D* getColorTexture() const { return _colorTexture; }
+	//virtual Texture2D* getResolveTexture() const { return _resolveTexture; }
+	//virtual Texture2D* getDepthStencilTexture() const { return _depthStencilTexture; }
+	virtual void reset();
+	virtual void bind();
+	virtual void restore();
+	virtual void discard();
+	virtual void resolve();
+
+	virtual bool download(void* buffer);
+
+
+protected:
+	mutable Texture2D* _colorTexture;
+	mutable Texture2D* _depthStencilTexture;
+	mutable Texture2D* _resolveTexture;
+
+	Texture2D::PixelFormat _pixelFormat;
+	
+	// Initialize framebuffer
+	virtual bool init(int width, int height, Texture2D::PixelFormat format, GLenum depthStencilFormat = 0, int samples = 1);
+
+private:
+	// The folowing variables is only for OpenGL
+	mutable GLuint _FBO;
+	GLint _oldFBO;
+	GLuint _depthRenderBufffer;
+	Texture2D* _textureCopy;
+	bool _isQCOM;
+};
+
+NS_CC_END
+
+#endif

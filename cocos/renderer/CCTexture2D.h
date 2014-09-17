@@ -30,7 +30,6 @@ THE SOFTWARE.
 
 #include <string>
 #include <map>
-#include <map>
 
 #include "base/CCRef.h"
 #include "math/CCGeometry.h"
