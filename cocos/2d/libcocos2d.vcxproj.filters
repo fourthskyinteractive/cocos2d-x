@@ -445,6 +445,9 @@
     <ClCompile Include="..\renderer\CCCustomCommand.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
+	<ClCompile Include="..\renderer\CCFrameBuffer.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
     <ClCompile Include="..\renderer\CCGLProgram.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
@@ -578,9 +581,6 @@
       <Filter>storage</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\desktop\CCGLViewImpl.cpp">
-      <Filter>platform\desktop</Filter>
-    </ClCompile>
-	<ClCompile Include="..\platform\desktop\CCGLViewImpl-ogl2.cpp">
       <Filter>platform\desktop</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\CCGLView.cpp">
@@ -1049,6 +1049,9 @@
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\renderer\CCCustomCommand.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+	<ClInclude Include="..\renderer\CCFrameBuffer.h">
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\renderer\CCGLProgram.h">

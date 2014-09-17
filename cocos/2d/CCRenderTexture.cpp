@@ -94,11 +94,12 @@ void RenderTexture::listenToBackground(EventCustom *event)
     CC_SAFE_DELETE(_UITextureImage);
     
     // to get the rendered texture data
+	/*
     _UITextureImage = newImage(false);
 
     if (_UITextureImage)
     {
-        const Size& s = _texture->getContentSizeInPixels();
+        const Size& s = _frameBuffer->getColorTexture()->getContentSizeInPixels();
         VolatileTextureMgr::addDataTexture(_texture, _UITextureImage->getData(), s.width * s.height * 4, Texture2D::PixelFormat::RGBA8888, s);
         
         if ( _textureCopy )
@@ -110,9 +111,9 @@ void RenderTexture::listenToBackground(EventCustom *event)
     {
         CCLOG("Cache rendertexture failed!");
     }
-    
-    glDeleteFramebuffers(1, &_FBO);
-    _FBO = 0;
+    */
+
+	CC_SAFE_RELEASE(_frameBuffer);
 #endif
 #endif
 }
@@ -138,7 +139,8 @@ void RenderTexture::listenToForeground(EventCustom *event)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture->getName(), 0);
     glBindFramebuffer(GL_FRAMEBUFFER, _oldFBO);
 	*/
-	_frameBuffer->rese();
+
+	_frameBuffer->reset();
 
 #endif
 #endif
@@ -527,44 +529,47 @@ void RenderTexture::onEnd()
 void RenderTexture::onClear()
 {
     // save clear color
-    GLfloat oldClearColor[4] = {0.0f};
+    //GLfloat oldClearColor[4] = {0.0f};
+	Color4F oldClearColor;
     GLfloat oldDepthClearValue = 0.0f;
     GLint oldStencilClearValue = 0;
+
+	auto glView = Director::getInstance()->getOpenGLView();
 
     // backup and set
     if (_clearFlags & GL_COLOR_BUFFER_BIT)
     {
-        glGetFloatv(GL_COLOR_CLEAR_VALUE, oldClearColor);
-        glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
+		glView->getClearColor(oldClearColor);
+        glView->setClearColor(_clearColor);
     }
 
     if (_clearFlags & GL_DEPTH_BUFFER_BIT)
     {
-        glGetFloatv(GL_DEPTH_CLEAR_VALUE, &oldDepthClearValue);
-        glClearDepth(_clearDepth);
+		glView->getDepthClear(oldDepthClearValue);
+		glView->setDepthClear(_clearDepth);
     }
 
     if (_clearFlags & GL_STENCIL_BUFFER_BIT)
     {
-        glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &oldStencilClearValue);
-        glClearStencil(_clearStencil);
+		glView->getStencilClear(oldStencilClearValue);
+		glView->setStencilClear(_clearStencil);
     }
 
     // clear
-    glClear(_clearFlags);
+	glView->clearView(_clearFlags & GL_DEPTH_BUFFER_BIT, _clearFlags & GL_STENCIL_BUFFER_BIT);
 
     // restore
     if (_clearFlags & GL_COLOR_BUFFER_BIT)
     {
-        glClearColor(oldClearColor[0], oldClearColor[1], oldClearColor[2], oldClearColor[3]);
+		glView->setClearColor(oldClearColor);
     }
     if (_clearFlags & GL_DEPTH_BUFFER_BIT)
     {
-        glClearDepth(oldDepthClearValue);
+		glView->setDepthClear(oldDepthClearValue);
     }
     if (_clearFlags & GL_STENCIL_BUFFER_BIT)
     {
-        glClearStencil(oldStencilClearValue);
+		glView->setStencilClear(oldStencilClearValue);
     }
 }
 

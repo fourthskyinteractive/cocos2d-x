@@ -483,6 +483,41 @@ void GLViewImpl::setDepthTest(bool on)
 	CHECK_GL_ERROR_DEBUG();
 }
 
+void GLViewImpl::setClearColor(const Color4F& color)
+{
+	glClearColor(color.r, color.g, color.b, color.a);
+}
+
+void GLViewImpl::getClearColor(Color4F& color)
+{
+	GLfloat oldColor[4] = { 0.0f };
+	glGetFloatv(GL_COLOR_CLEAR_VALUE, oldColor);
+	color.r = oldColor[0];
+	color.g = oldColor[1];
+	color.b = oldColor[2];
+	color.a = oldColor[3];
+}
+
+void GLViewImpl::setDepthClear(float value)
+{
+	glClearDepth(value);
+}
+
+void GLViewImpl::getDepthClear(float& value)
+{
+	glClearDepth(value);
+}
+
+void GLViewImpl::setStencilClear(int value)
+{
+	glClearStencil(value);
+}
+
+void GLViewImpl::getStencilClear(int& value)
+{
+	glClearStencil(value);
+}
+
 void GLViewImpl::draw(GLenum primitive, GLint first, GLsizei count)
 {
 	// Draw

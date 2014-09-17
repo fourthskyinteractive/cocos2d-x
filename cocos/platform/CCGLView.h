@@ -104,6 +104,18 @@ public:
 	/** Set depth test */
 	virtual void setDepthTest(bool on) = 0;
 
+	/** Set clear color */
+	virtual void setClearColor(const Color4F& color) = 0;
+	virtual void getClearColor(Color4F& color) = 0;
+	
+	/**  */
+	virtual void setDepthClear(float value) = 0;
+	virtual void getDepthClear(float& value) = 0;
+
+	/**  */
+	virtual void setStencilClear(int value) = 0;
+	virtual void getStencilClear(int& value) = 0;
+
 	/** Draw vertices */
 	virtual void draw(GLenum primitive, GLint first, GLsizei count) = 0;
 

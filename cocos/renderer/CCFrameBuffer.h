@@ -55,15 +55,14 @@ public:
 
 	static FrameBuffer* create(int width, int height, Texture2D::PixelFormat format, GLenum depthStencilFormat = 0, int samples = 1);
 	
-	virtual GLint getFBO() const;
+	virtual GLuint getFBO() const { return _FBO; }
 	virtual Texture2D* getColorTexture() const { return _colorTexture; }
-	//virtual Texture2D* getResolveTexture() const { return _resolveTexture; }
 	//virtual Texture2D* getDepthStencilTexture() const { return _depthStencilTexture; }
 	virtual void reset();
 	virtual void bind();
 	virtual void restore();
 	virtual void discard();
-	virtual void resolve();
+	virtual void resolve(Texture2D* resolveTex);
 
 	virtual bool download(void* buffer);
 
@@ -71,7 +70,6 @@ public:
 protected:
 	mutable Texture2D* _colorTexture;
 	mutable Texture2D* _depthStencilTexture;
-	mutable Texture2D* _resolveTexture;
 
 	Texture2D::PixelFormat _pixelFormat;
 	

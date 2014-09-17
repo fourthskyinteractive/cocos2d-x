@@ -38,9 +38,9 @@ NS_CC_BEGIN
 FrameBuffer::FrameBuffer()
 : _colorTexture(nullptr)
 , _depthStencilTexture(nullptr)
-, _resolveTexture(nullptr)
 , _FBO(0)
 , _oldFBO(0)
+, _depthRenderBufffer(0)
 , _textureCopy(nullptr)
 , _isQCOM(false)
 {
@@ -51,12 +51,25 @@ FrameBuffer::~FrameBuffer()
 {
 	CC_SAFE_RELEASE(_colorTexture);
 	CC_SAFE_RELEASE(_depthStencilTexture);
-	CC_SAFE_RELEASE(_resolveTexture);
+
+	releaseGLObjects();
 }
 
 void FrameBuffer::releaseGLObjects()
 {
+	CC_SAFE_RELEASE(_textureCopy);
 
+	if (_depthRenderBufffer)
+	{
+		glDeleteFramebuffers(1, &_depthRenderBufffer);
+		_depthRenderBufffer = 0;
+	}
+
+	if (_FBO)
+	{
+		glDeleteFramebuffers(1, &_FBO);
+		_FBO = 0;
+	}
 }
 
 FrameBuffer* FrameBuffer::create(int width, int height, Texture2D::PixelFormat format, GLenum depthStencilFormat, int samples)
@@ -92,7 +105,10 @@ bool FrameBuffer::init(int width, int height, Texture2D::PixelFormat format, GLe
 		width = (int)(width * CC_CONTENT_SCALE_FACTOR());
 		height = (int)(height * CC_CONTENT_SCALE_FACTOR());
 
+		// Store current framebufer
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_oldFBO);
+		
+		// Store current renderbuffer
 		GLint oldRBO;
 		glGetIntegerv(GL_RENDERBUFFER_BINDING, &oldRBO);
 
@@ -121,6 +137,7 @@ bool FrameBuffer::init(int width, int height, Texture2D::PixelFormat format, GLe
 		_colorTexture = new (std::nothrow) Texture2D();
 		if (_colorTexture)
 		{
+			_colorTexture->retain();
 			_colorTexture->initWithData(data, dataLen, (Texture2D::PixelFormat)_pixelFormat, powW, powH, Size((float)width, (float)height));
 		}
 		else
@@ -133,6 +150,7 @@ bool FrameBuffer::init(int width, int height, Texture2D::PixelFormat format, GLe
 			_textureCopy = new Texture2D();
 			if (_textureCopy)
 			{
+				_textureCopy->retain();
 				_textureCopy->initWithData(data, dataLen, (Texture2D::PixelFormat)_pixelFormat, powW, powH, Size((float)width, (float)height));
 			}
 			else
@@ -166,19 +184,15 @@ bool FrameBuffer::init(int width, int height, Texture2D::PixelFormat format, GLe
 		// check if it worked (probably worth doing :) )
 		CCASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Could not attach texture to framebuffer");
 
+		// Restore current renderbuffer and framebuffer
 		glBindRenderbuffer(GL_RENDERBUFFER, oldRBO);
-		glBindFramebuffer(GL_FRAMEBUFFER, _oldFBO);
+		restore();
 
 	} while (0);
 
 	CC_SAFE_FREE(data);
 
 	return true;
-}
-
-GLint FrameBuffer::getFBO() const
-{
-	return _FBO;
 }
 
 void FrameBuffer::reset()
@@ -196,12 +210,17 @@ void FrameBuffer::reset()
 	}
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _colorTexture->getName(), 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, _oldFBO);
+	
+	// Restore framebuffer
+	restore();
 }
 
 void FrameBuffer::bind()
 {
+	// Store current framebuffer
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_oldFBO);
+	
+	// Use this framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
 
 	if (_isQCOM)
@@ -227,34 +246,34 @@ bool FrameBuffer::download(void* buffer)
 
 	const Size& s = _colorTexture->getContentSizeInPixels();
 
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_oldFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
+	bind();
 
-	if (_isQCOM)
-	{
-		// -- bind a temporary texture so we can clear the render buffer without losing our texture
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureCopy->getName(), 0);
-		CHECK_GL_ERROR_DEBUG();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _colorTexture->getName(), 0);
-	}
+	// Configure pixel alignment
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, s.width, s.height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, _oldFBO);
 
+	// Red pixels from framebuffer
+	glReadPixels(0, 0, s.width, s.height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	CHECK_GL_ERROR_DEBUG();
+
+	restore();
+
+	
 
 	return true;
 }
 
 void FrameBuffer::discard()
 {
+	const GLenum discards[] = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
 
+	
 }
 
-void FrameBuffer::resolve()
+void FrameBuffer::resolve(Texture2D* resolveTex)
 {
-
+	CCASSERT((_colorTexture->getContentSizeInPixels().width == resolveTex->getContentSizeInPixels().width &&
+			 _colorTexture->getContentSizeInPixels().height == resolveTex->getContentSizeInPixels().height &&
+			 _colorTexture->getPixelFormat() == resolveTex->getPixelFormat()), "");
 }
 
 NS_CC_END
