@@ -303,15 +303,16 @@ void RenderTexture::clearDepth(float depthValue)
 
 void RenderTexture::clearStencil(int stencilValue)
 {
-    // save old stencil value
-    int stencilClearValue;
-    glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &stencilClearValue);
+	auto glView = Director::getInstance()->getOpenGLView();
 
-    glClearStencil(stencilValue);
-    glClear(GL_STENCIL_BUFFER_BIT);
+	//! save old depth value
+	int stencilClearValue = glView->getStencilClear();
 
-    // restore clear color
-    glClearStencil(stencilClearValue);
+	glView->setStencilClear(_clearDepth);
+	glView->clearView(false, true);
+
+	// restore clear color
+	glView->setDepthClear(stencilClearValue);
 }
 
 void RenderTexture::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t parentFlags)
@@ -529,29 +530,28 @@ void RenderTexture::onEnd()
 void RenderTexture::onClear()
 {
     // save clear color
-    //GLfloat oldClearColor[4] = {0.0f};
 	Color4F oldClearColor;
-    GLfloat oldDepthClearValue = 0.0f;
-    GLint oldStencilClearValue = 0;
+    float oldDepthClearValue = 0.0f;
+    int oldStencilClearValue = 0;
 
 	auto glView = Director::getInstance()->getOpenGLView();
 
     // backup and set
     if (_clearFlags & GL_COLOR_BUFFER_BIT)
     {
-		glView->getClearColor(oldClearColor);
+		oldClearColor = glView->getClearColor();
         glView->setClearColor(_clearColor);
     }
 
     if (_clearFlags & GL_DEPTH_BUFFER_BIT)
     {
-		glView->getDepthClear(oldDepthClearValue);
+		oldDepthClearValue = glView->getDepthClear();
 		glView->setDepthClear(_clearDepth);
     }
 
     if (_clearFlags & GL_STENCIL_BUFFER_BIT)
     {
-		glView->getStencilClear(oldStencilClearValue);
+		oldStencilClearValue = glView->getStencilClear();
 		glView->setStencilClear(_clearStencil);
     }
 
@@ -575,15 +575,16 @@ void RenderTexture::onClear()
 
 void RenderTexture::onClearDepth()
 {
-    //! save old depth value
-    GLfloat depthClearValue;
-    glGetFloatv(GL_DEPTH_CLEAR_VALUE, &depthClearValue);
+	auto glView = Director::getInstance()->getOpenGLView();
 
-    glClearDepth(_clearDepth);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    //! save old depth value
+	float depthClearValue = glView->getDepthClear();
+
+    glView->setDepthClear(_clearDepth);
+	glView->clearView(true);
 
     // restore clear color
-    glClearDepth(depthClearValue);
+	glView->setDepthClear(depthClearValue);
 }
 
 void RenderTexture::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)

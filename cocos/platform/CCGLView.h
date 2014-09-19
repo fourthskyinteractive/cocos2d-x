@@ -101,20 +101,23 @@ public:
 	/** Set alpha blending */
 	virtual void setAlphaBlending(bool on) = 0;
 
+	/** Set blend function */
+	virtual void setBlendFunc(const BlendFunc& func) = 0;
+
 	/** Set depth test */
 	virtual void setDepthTest(bool on) = 0;
 
 	/** Set clear color */
 	virtual void setClearColor(const Color4F& color) = 0;
-	virtual void getClearColor(Color4F& color) = 0;
+	virtual Color4F getClearColor() = 0;
 	
 	/**  */
 	virtual void setDepthClear(float value) = 0;
-	virtual void getDepthClear(float& value) = 0;
+	virtual float getDepthClear() = 0;
 
 	/**  */
 	virtual void setStencilClear(int value) = 0;
-	virtual void getStencilClear(int& value) = 0;
+	virtual int getStencilClear() = 0;
 
 	/** Draw vertices */
 	virtual void draw(GLenum primitive, GLint first, GLsizei count) = 0;

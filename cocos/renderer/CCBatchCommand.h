@@ -47,7 +47,6 @@ public:
 protected:
     //Material
     int32_t _materialID;
-    GLuint _textureID;
     GLProgram* _shader;
     BlendFunc _blendType;
 

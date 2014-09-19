@@ -63,7 +63,8 @@ public:
     void setVec4(const Vec4& value);
     void setMat4(const Mat4& value);
     void setCallback(const std::function<void(GLProgram*, Uniform*)> &callback);
-    void setTexture(GLuint textureId, GLuint activeTexture);
+    //void setTexture(GLuint textureId, GLuint activeTexture);
+	void setTexture(Texture2D* texture, GLuint activeTexture);
 
     void apply();
 
@@ -80,7 +81,8 @@ protected:
         float v4Value[4];
         float matrixValue[16];
         struct {
-            GLuint textureId;
+            //GLuint textureId;
+			Texture2D* texture;
             GLuint textureUnit;
         } tex;
         std::function<void(GLProgram*, Uniform*)> *callback;
@@ -187,7 +189,7 @@ public:
     void setUniformMat4(const std::string &uniformName, const Mat4& value);
     void setUniformCallback(const std::string &uniformName, const std::function<void(GLProgram*, Uniform*)> &callback);
     void setUniformTexture(const std::string &uniformName, Texture2D *texture);
-    void setUniformTexture(const std::string &uniformName, GLuint textureId);
+    //void setUniformTexture(const std::string &uniformName, GLuint textureId);
 
     void setUniformInt(GLint uniformLocation, int value);
     void setUniformFloat(GLint uniformLocation, float value);
@@ -197,7 +199,7 @@ public:
     void setUniformMat4(GLint uniformLocation, const Mat4& value);
     void setUniformCallback(GLint uniformLocation, const std::function<void(GLProgram*, Uniform*)> &callback);
     void setUniformTexture(GLint uniformLocation, Texture2D *texture);
-    void setUniformTexture(GLint uniformLocation, GLuint textureId);
+    //void setUniformTexture(GLint uniformLocation, GLuint textureId);
 
 protected:
     GLProgramState();

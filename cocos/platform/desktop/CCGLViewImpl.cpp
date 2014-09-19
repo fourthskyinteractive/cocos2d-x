@@ -467,6 +467,19 @@ void GLViewImpl::setAlphaBlending(bool on)
 	CHECK_GL_ERROR_DEBUG();
 }
 
+void GLViewImpl::setBlendFunc(const BlendFunc& func)
+{
+	if (func.src == GL_ONE && func.dst == GL_ZERO)
+	{
+		glDisable(GL_BLEND);
+	}
+	else
+	{
+		glEnable(GL_BLEND);
+		glBlendFunc(func.src, func.dst);
+	}
+}
+
 void GLViewImpl::setDepthTest(bool on)
 {
 	if (on)
@@ -488,14 +501,12 @@ void GLViewImpl::setClearColor(const Color4F& color)
 	glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void GLViewImpl::getClearColor(Color4F& color)
+Color4F GLViewImpl::getClearColor()
 {
-	GLfloat oldColor[4] = { 0.0f };
-	glGetFloatv(GL_COLOR_CLEAR_VALUE, oldColor);
-	color.r = oldColor[0];
-	color.g = oldColor[1];
-	color.b = oldColor[2];
-	color.a = oldColor[3];
+	Color4F color;
+	glGetFloatv(GL_COLOR_CLEAR_VALUE, reinterpret_cast<GLfloat*>(&color));
+	
+	return color;
 }
 
 void GLViewImpl::setDepthClear(float value)
@@ -503,9 +514,12 @@ void GLViewImpl::setDepthClear(float value)
 	glClearDepth(value);
 }
 
-void GLViewImpl::getDepthClear(float& value)
+float GLViewImpl::getDepthClear()
 {
-	glClearDepth(value);
+	float value = 0;
+	glGetFloatv(GL_DEPTH_CLEAR_VALUE, &value);
+
+	return value;
 }
 
 void GLViewImpl::setStencilClear(int value)
@@ -513,9 +527,12 @@ void GLViewImpl::setStencilClear(int value)
 	glClearStencil(value);
 }
 
-void GLViewImpl::getStencilClear(int& value)
+int GLViewImpl::getStencilClear()
 {
-	glClearStencil(value);
+	int value = 0;
+	glGetIntegerv(GL_STENCIL_CLEAR_VALUE, &value);
+
+	return value;
 }
 
 void GLViewImpl::draw(GLenum primitive, GLint first, GLsizei count)
