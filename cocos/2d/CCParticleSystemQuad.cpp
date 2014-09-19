@@ -42,6 +42,9 @@ THE SOFTWARE.
 #include "renderer/CCQuadCommand.h"
 #include "renderer/CCCustomCommand.h"
 
+#include "renderer/CCVertexIndexData.h"
+#include "renderer/CCVertexIndexBuffer.h"
+
 // extern
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventDispatcher.h"
@@ -51,9 +54,11 @@ NS_CC_BEGIN
 ParticleSystemQuad::ParticleSystemQuad()
 :_quads(nullptr)
 ,_indices(nullptr)
-,_VAOname(0)
+//, _vertexData(nullptr)
+//, _vertexBuffer(nullptr)
+//, _indexBuffer(nullptr)
 {
-    memset(_buffersVBO, 0, sizeof(_buffersVBO));
+    
 }
 
 ParticleSystemQuad::~ParticleSystemQuad()
@@ -62,12 +67,10 @@ ParticleSystemQuad::~ParticleSystemQuad()
     {
         CC_SAFE_FREE(_quads);
         CC_SAFE_FREE(_indices);
-        glDeleteBuffers(2, &_buffersVBO[0]);
-        if (Configuration::getInstance()->supportsShareableVAO())
-        {
-            glDeleteVertexArrays(1, &_VAOname);
-            GL::bindVAO(0);
-        }
+        
+		//CC_SAFE_RELEASE(_vertexData);
+		//CC_SAFE_RELEASE(_vertexBuffer);
+		//CC_SAFE_RELEASE(_indexBuffer);
     }
 }
 
@@ -122,14 +125,7 @@ bool ParticleSystemQuad::initWithTotalParticles(int numberOfParticles)
         }
 
         initIndices();
-        if (Configuration::getInstance()->supportsShareableVAO())
-        {
-            setupVBOandVAO();
-        }
-        else
-        {
-            setupVBO();
-        }
+        setupVBOandVAO();
 
         setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP));
 
@@ -348,23 +344,9 @@ void ParticleSystemQuad::updateQuadWithParticle(tParticle* particle, const Vec2&
 }
 void ParticleSystemQuad::postStep()
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-    
-    // Option 1: Sub Data
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_quads[0])*_totalParticles, _quads);
-    
-    // Option 2: Data
-    //  glBufferData(GL_ARRAY_BUFFER, sizeof(quads_[0]) * particleCount, quads_, GL_DYNAMIC_DRAW);
-    
-    // Option 3: Orphaning + glMapBuffer
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0])*_totalParticles, nullptr, GL_STREAM_DRAW);
-    // void *buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-    // memcpy(buf, _quads, sizeof(_quads[0])*_totalParticles);
-    // glUnmapBuffer(GL_ARRAY_BUFFER);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
-    CHECK_GL_ERROR_DEBUG();
+	//void* buf = _vertexBuffer->map();
+	//memcpy(buf, _quads, sizeof(_quads[0]) * _totalParticles);
+	//_vertexBuffer->unmap();
 }
 
 // overriding draw method
@@ -374,7 +356,7 @@ void ParticleSystemQuad::draw(Renderer *renderer, const Mat4 &transform, uint32_
     //quad command
     if(_particleIdx > 0)
     {
-        _quadCommand.init(_globalZOrder, _texture->getName(), getGLProgramState(), _blendFunc, _quads, _particleIdx, transform);
+        _quadCommand.init(_globalZOrder, _texture, getGLProgramState(), _blendFunc, _quads, _particleIdx, transform);
         renderer->addCommand(&_quadCommand);
     }
 }
@@ -431,14 +413,7 @@ void ParticleSystemQuad::setTotalParticles(int tp)
         }
 
         initIndices();
-        if (Configuration::getInstance()->supportsShareableVAO())
-        {
-            setupVBOandVAO();
-        }
-        else
-        {
-            setupVBO();
-        }
+        setupVBOandVAO();
         
         // fixed http://www.cocos2d-x.org/issues/3990
         // Updates texture coords.
@@ -458,71 +433,39 @@ void ParticleSystemQuad::setTotalParticles(int tp)
 
 void ParticleSystemQuad::setupVBOandVAO()
 {
-    // clean VAO
-    glDeleteBuffers(2, &_buffersVBO[0]);
-    glDeleteVertexArrays(1, &_VAOname);
-    GL::bindVAO(0);
-    
-    glGenVertexArrays(1, &_VAOname);
-    GL::bindVAO(_VAOname);
+	/*
+	// Create buffers
+	_vertexBuffer = VertexBuffer::create(sizeof(V3F_C4B_T2F), sizeof(V3F_C4B_T2F) * _totalParticles, true);
+	_indexBuffer = IndexBuffer::create(IndexBuffer::IndexType::INDEX_TYPE_SHORT_16, _totalParticles * 6, false);
+	_vertexBuffer->retain();
+	_indexBuffer->retain();
 
-#define kQuadSize sizeof(_quads[0].bl)
+	// Update buffers' data
+	void* buf = _vertexBuffer->map();
+	memcpy(buf, _quads, sizeof(_quads[0]) * _totalParticles);
+	_vertexBuffer->unmap();
 
-    glGenBuffers(2, &_buffersVBO[0]);
+	buf = _indexBuffer->map();
+	memcpy(buf, _indices, sizeof(_indices[0]) * _totalParticles * 6);
+	_indexBuffer->unmap();
 
-    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * _totalParticles, _quads, GL_DYNAMIC_DRAW);
+	_vertexData = VertexData::create();
+	_vertexData->retain();
 
-    // vertices
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof( V3F_C4B_T2F, vertices));
+	// vertices
+	_vertexData->setStream(_vertexBuffer, VertexStreamAttribute(0, GLProgram::VERTEX_ATTRIB_POSITION, GL_FLOAT, 2));
 
-    // colors
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (GLvoid*) offsetof( V3F_C4B_T2F, colors));
+	// colors
+	_vertexData->setStream(_vertexBuffer, VertexStreamAttribute(offsetof(V3F_C4B_T2F, colors), GLProgram::VERTEX_ATTRIB_COLOR, GL_UNSIGNED_BYTE, 4, true));
 
-    // tex coords
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORD);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof( V3F_C4B_T2F, texCoords));
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _totalParticles * 6, _indices, GL_STATIC_DRAW);
-
-    // Must unbind the VAO before changing the element buffer.
-    GL::bindVAO(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    CHECK_GL_ERROR_DEBUG();
-}
-
-void ParticleSystemQuad::setupVBO()
-{
-    glDeleteBuffers(2, &_buffersVBO[0]);
-    
-    glGenBuffers(2, &_buffersVBO[0]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * _totalParticles, _quads, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _totalParticles * 6, _indices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    CHECK_GL_ERROR_DEBUG();
+	// tex coords
+	_vertexData->setStream(_vertexBuffer, VertexStreamAttribute(offsetof(V3F_C4B_T2F, texCoords), GLProgram::VERTEX_ATTRIB_TEX_COORD, GL_FLOAT, 2));
+	*/
 }
 
 void ParticleSystemQuad::listenRendererRecreated(EventCustom* event)
 {
-    if (Configuration::getInstance()->supportsShareableVAO())
-    {
-        setupVBOandVAO();
-    }
-    else
-    {
-        setupVBO();
-    }
+	setupVBOandVAO();
 }
 
 bool ParticleSystemQuad::allocMemory()
@@ -564,14 +507,8 @@ void ParticleSystemQuad::setBatchNode(ParticleBatchNode * batchNode)
             allocMemory();
             initIndices();
             setTexture(oldBatch->getTexture());
-            if (Configuration::getInstance()->supportsShareableVAO())
-            {
-                setupVBOandVAO();
-            }
-            else
-            {
-                setupVBO();
-            }
+			setupVBOandVAO();
+			
         }
         // OLD: was it self render ? cleanup
         else if( !oldBatch )
@@ -584,14 +521,9 @@ void ParticleSystemQuad::setBatchNode(ParticleBatchNode * batchNode)
             CC_SAFE_FREE(_quads);
             CC_SAFE_FREE(_indices);
 
-            glDeleteBuffers(2, &_buffersVBO[0]);
-            memset(_buffersVBO, 0, sizeof(_buffersVBO));
-            if (Configuration::getInstance()->supportsShareableVAO())
-            {
-                glDeleteVertexArrays(1, &_VAOname);
-                GL::bindVAO(0);
-                _VAOname = 0;
-            }
+			//CC_SAFE_RELEASE(_vertexData);
+			//CC_SAFE_RELEASE(_vertexBuffer);
+			//CC_SAFE_RELEASE(_indexBuffer);
         }
     }
 }

@@ -35,6 +35,9 @@ NS_CC_BEGIN
 
 class SpriteFrame;
 class EventCustom;
+class VertexBuffer;
+class IndexBuffer;
+class VertexData;
 
 /**
  * @addtogroup particle_nodes
@@ -150,13 +153,15 @@ protected:
     void updateTexCoords();
 
     void setupVBOandVAO();
-    void setupVBO();
+    //void setupVBO();
     bool allocMemory();
 
     V3F_C4B_T2F_Quad    *_quads;        // quads to be rendered
     GLushort            *_indices;      // indices
-    GLuint              _VAOname;
-    GLuint              _buffersVBO[2]; //0: vertex  1: indices
+	//VertexBuffer* _vertexBuffer;
+	//IndexBuffer* _indexBuffer;
+	//VertexData* _vertexData;
+
 
     QuadCommand _quadCommand;           // quad command
 

@@ -30,16 +30,19 @@
 
 NS_CC_BEGIN
 class GLProgramState;
+class Texture2D;
+
 class CC_DLL PrimitiveCommand : public RenderCommand
 {
 public:
     PrimitiveCommand();
     ~PrimitiveCommand();
     
-    void init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, Primitive* primitive,const Mat4& mv);
+	void init(float globalOrder, /*GLuint textureID*/Texture2D* texture, GLProgramState* glProgramState, BlendFunc blendType, Primitive* primitive, const Mat4& mv);
     
     inline uint32_t getMaterialID() const { return _materialID; }
-    inline GLuint getTextureID() const { return _textureID; }
+    //inline GLuint getTextureID() const { return _textureID; }
+	inline Texture2D* getTexture() const { return _texture; }
     inline GLProgramState* getGLProgramState() const { return _glProgramState; }
     inline BlendFunc getBlendType() const { return _blendType; }
     inline const Mat4& getModelView() const { return _mv; }
@@ -48,7 +51,8 @@ public:
 protected:
     
     uint32_t _materialID;
-    GLuint _textureID;
+    //GLuint _textureID;
+	Texture2D* _texture;
     GLProgramState* _glProgramState;
     BlendFunc _blendType;
     Primitive* _primitive;

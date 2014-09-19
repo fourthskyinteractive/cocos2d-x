@@ -29,11 +29,14 @@
 #include "renderer/CCGLProgramState.h"
 #include "xxhash.h"
 
+#include "renderer/CCTexture2D.h"
+
 NS_CC_BEGIN
 
 PrimitiveCommand::PrimitiveCommand()
 : _materialID(0)
-, _textureID(0)
+//, _textureID(0)
+, _texture(nullptr)
 , _glProgramState(nullptr)
 , _blendType(BlendFunc::DISABLE)
 , _primitive(nullptr)
@@ -45,7 +48,7 @@ PrimitiveCommand::~PrimitiveCommand()
 {
 }
 
-void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, Primitive* primitive,const Mat4& mv)
+void PrimitiveCommand::init(float globalOrder, /*GLuint textureID*/Texture2D* texture, GLProgramState* glProgramState, BlendFunc blendType, Primitive* primitive,const Mat4& mv)
 {
     CCASSERT(glProgramState, "Invalid GLProgramState");
     CCASSERT(glProgramState->getVertexAttribsFlags() == 0, "No custom attributes are supported in PrimitiveCommand");
@@ -57,9 +60,9 @@ void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState*
     
     _mv = mv;
     
-    if( _textureID != textureID || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != glProgramState) {
+	if (_texture == nullptr || _texture->getName() != texture->getName() || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != glProgramState) {
         
-        _textureID = textureID;
+		_texture = texture;
         _blendType = blendType;
         _glProgramState = glProgramState;
         
@@ -68,11 +71,11 @@ void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState*
 
 void PrimitiveCommand::execute() const
 {
-    //Set texture
-    GL::bindTexture2D(_textureID);
-    
-    //set blend mode
-    GL::blendFunc(_blendType.src, _blendType.dst);
+	//Set texture
+	_texture->bind();
+
+	//set blend mode
+	Director::getInstance()->getOpenGLView()->setBlendFunc(_blendType);
     
     _glProgramState->apply(_mv);
     
